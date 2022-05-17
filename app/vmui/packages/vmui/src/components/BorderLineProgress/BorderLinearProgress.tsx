@@ -21,7 +21,7 @@ export const BorderLinearProgressWithLabel = (props: LinearProgressProps & { val
       <BorderLinearProgress variant="determinate" {...props} />
     </Box>
     <Box sx={{ minWidth: 35 }}>
-      <Typography variant="body2" color="text.secondary">{`${Math.round(props.value,)}%`}</Typography>
+      <Typography variant="body2" color="text.secondary">{`${props.value.toFixed(2)}%`}</Typography>
     </Box>
   </Box>
 );
