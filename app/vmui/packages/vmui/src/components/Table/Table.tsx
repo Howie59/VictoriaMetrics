@@ -13,14 +13,13 @@ import {ChangeEvent, MouseEvent} from "react";
 import {Data, TableProps, Order,} from "./types";
 import {EnhancedTableHead} from "./TableHead";
 import {getComparator, stableSort} from "./helpers";
-import {DashboardRow} from "../../types";
-import {TopHeapEntry} from "../CardinalityPanel/types";
+import {BorderLinearProgressWithLabel} from "../BorderLineProgress/BorderLinearProgress";
 
 
-const EnhancedTable: FC<TableProps> = ({rows, headerCells}) => {
- console.log("TABLE DATA =>", rows);
-  const [order, setOrder] = useState<Order>("asc");
-  const [orderBy, setOrderBy] = useState<keyof Data>("name");
+const EnhancedTable: FC<TableProps> = ({rows, headerCells, defaultSortColumn}) => {
+
+  const [order, setOrder] = useState<Order>("desc");
+  const [orderBy, setOrderBy] = useState<keyof Data>(defaultSortColumn);
   const [selected, setSelected] = useState<readonly string[]>([]);
   const [page, setPage] = useState(0);
   const [dense, setDense] = useState(false);
@@ -122,11 +121,18 @@ const EnhancedTable: FC<TableProps> = ({rows, headerCells}) => {
                     >
                       {Object.keys(row).map((key, idx) => {
                         if (idx === 0) {
-                          return <TableCell component="th" id={labelId} scope="row">
+                          return (<TableCell component="th" id={labelId} scope="row" key={key}>
                             {row[key as keyof Data]}
-                          </TableCell>
+                          </TableCell>);
                         }
-                        return <TableCell align="right">{row[key as keyof Data]}</TableCell>
+                        if (key === "progressValue") {
+                          return (
+                            <TableCell key={key}>
+                              <BorderLinearProgressWithLabel variant="determinate" value={row[key as keyof Data] as number} />
+                            </TableCell>
+                          );
+                        }
+                        return (<TableCell key={key}>{row[key as keyof Data]}</TableCell>);
                       })}
                     </TableRow>
                   );
@@ -153,6 +159,6 @@ const EnhancedTable: FC<TableProps> = ({rows, headerCells}) => {
       </Paper>
     </Box>
   );
-}
+};
 
 export default EnhancedTable;

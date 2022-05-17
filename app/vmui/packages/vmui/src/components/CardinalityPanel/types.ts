@@ -15,3 +15,7 @@ export interface TopHeapEntry {
   name:  string;
   count: number;
 }
+
+export type TypographyFunctions = {
+  [key: string]: (value: number) => string,
+}

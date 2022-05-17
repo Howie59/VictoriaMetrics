@@ -22,12 +22,14 @@ export interface EnhancedHeaderTableProps {
 
 export interface TableProps {
   rows: Data[];
-  headerCells: HeadCell[]
+  headerCells: HeadCell[],
+  defaultSortColumn: keyof Data,
 }
 
 export interface Data {
   name: string;
   value: number;
+  progressValue: number;
 }
 
 export const headCells: readonly HeadCell[] = [

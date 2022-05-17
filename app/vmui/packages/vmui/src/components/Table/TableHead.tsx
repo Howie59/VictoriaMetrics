@@ -2,11 +2,11 @@ import {ChangeEvent, MouseEvent} from "react";
 import {Box, TableCell, TableHead, TableRow, TableSortLabel} from "@mui/material";
 import {visuallyHidden} from "@mui/utils";
 import React from "preact/compat";
-import {Data, EnhancedHeaderTableProps, headCells} from "./types";
+import {Data, EnhancedHeaderTableProps} from "./types";
 
 
 export function EnhancedTableHead(props: EnhancedHeaderTableProps) {
-  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } =
+  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, headerCells } =
     props;
   const createSortHandler =
     (property: keyof Data) => (event: MouseEvent<unknown>) => {
@@ -16,7 +16,7 @@ export function EnhancedTableHead(props: EnhancedHeaderTableProps) {
   return (
     <TableHead>
       <TableRow>
-        {headCells.map((headCell) => (
+        {headerCells.map((headCell) => (
           <TableCell
             key={headCell.id}
             align={headCell.numeric ? "right" : "left"}
@@ -25,7 +25,7 @@ export function EnhancedTableHead(props: EnhancedHeaderTableProps) {
             <TableSortLabel
               active={orderBy === headCell.id}
               direction={orderBy === headCell.id ? order : "asc"}
-              onClick={createSortHandler(headCell.id)}
+              onClick={createSortHandler(headCell.id as keyof Data)}
             >
               {headCell.label}
               {orderBy === headCell.id ? (
