@@ -24,6 +24,7 @@ export interface TableProps {
   rows: Data[];
   headerCells: HeadCell[],
   defaultSortColumn: keyof Data,
+  isPagingEnabled?: boolean,
 }
 
 export interface Data {

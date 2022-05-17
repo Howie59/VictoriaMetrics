@@ -3,7 +3,8 @@ import {Typography, Grid} from "@mui/material";
 import {useFetchQuery} from "../../hooks/useCardinalityFetch";
 import EnhancedTable from "../Table/Table";
 import {TSDBStatus, HeadStats, TopHeapEntry} from "./types";
-import {defaultHeadCells, headCellsWithProgress, progressCount, typographyValues} from "./consts";
+import {defaultHeadCells, headCellsWithProgress, labels} from "./consts";
+import {progressCount, typographyValues} from "./helpers";
 import {Data} from "../Table/types";
 
 
@@ -13,7 +14,7 @@ const CardinalityPanel: FC = () => {
   const {isLoading, tsdbStatus} = useFetchQuery({headsData: undefined, visible: false});
 
   const headsStats = Object.keys(tsdbStatus.headsStats).map((key: string) => {
-    return {name: key, value: tsdbStatus.headsStats[key as keyof HeadStats]} as Data;
+    return {name: labels[key as keyof HeadStats], value: tsdbStatus.headsStats[key as keyof HeadStats]} as Data;
   });
 
   return (
@@ -22,7 +23,11 @@ const CardinalityPanel: FC = () => {
         <Typography gutterBottom variant="h4" component="h4">
           Head Stats
         </Typography>
-        <EnhancedTable rows={headsStats} headerCells={defaultHeadCells} defaultSortColumn={"value"} />
+        <EnhancedTable
+          rows={headsStats}
+          headerCells={defaultHeadCells}
+          defaultSortColumn={"value"}
+        />
       </Grid>
       {Object.keys(tsdbStatus).map((key ) => {
         if (key == "headsStats") {

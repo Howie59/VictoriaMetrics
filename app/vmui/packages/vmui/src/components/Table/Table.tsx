@@ -1,22 +1,17 @@
-import {
-  Box,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TablePagination,
-  TableRow,
-} from "@mui/material";
+import {Box, Paper, Table, TableBody, TableCell, TableContainer, TablePagination, TableRow,} from "@mui/material";
 import React, {FC, useState} from "preact/compat";
 import {ChangeEvent, MouseEvent} from "react";
-import {Data, TableProps, Order,} from "./types";
+import {Data, Order, TableProps,} from "./types";
 import {EnhancedTableHead} from "./TableHead";
 import {getComparator, stableSort} from "./helpers";
 import {BorderLinearProgressWithLabel} from "../BorderLineProgress/BorderLinearProgress";
 
 
-const EnhancedTable: FC<TableProps> = ({rows, headerCells, defaultSortColumn}) => {
+const EnhancedTable: FC<TableProps> = ({
+  rows,
+  headerCells,
+  defaultSortColumn,
+  isPagingEnabled}) => {
 
   const [order, setOrder] = useState<Order>("desc");
   const [orderBy, setOrderBy] = useState<keyof Data>(defaultSortColumn);
@@ -82,13 +77,14 @@ const EnhancedTable: FC<TableProps> = ({rows, headerCells, defaultSortColumn}) =
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-
+  const sortedData = isPagingEnabled ? stableSort(rows, getComparator(order, orderBy))
+    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : stableSort(rows, getComparator(order, orderBy));
   return (
-    <Box sx={{ width: "100%" }}>
-      <Paper sx={{ width: "100%", mb: 2 }}>
+    <Box sx={{width: "100%"}}>
+      <Paper sx={{width: "100%", mb: 2}}>
         <TableContainer>
           <Table
-            sx={{ minWidth: 750 }}
+            sx={{minWidth: 750}}
             aria-labelledby="tableTitle"
             size={dense ? "small" : "medium"}
           >
@@ -103,8 +99,7 @@ const EnhancedTable: FC<TableProps> = ({rows, headerCells, defaultSortColumn}) =
             <TableBody>
               {/* if you don't need to support IE11, you can replace the `stableSort` call with:
               rows.slice().sort(getComparator(order, orderBy)) */}
-              {stableSort(rows, getComparator(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              {sortedData
                 .map((row, index) => {
                   const isItemSelected = isSelected(row.name);
                   const labelId = `enhanced-table-checkbox-${index}`;
@@ -128,7 +123,10 @@ const EnhancedTable: FC<TableProps> = ({rows, headerCells, defaultSortColumn}) =
                         if (key === "progressValue") {
                           return (
                             <TableCell key={key}>
-                              <BorderLinearProgressWithLabel variant="determinate" value={row[key as keyof Data] as number} />
+                              <BorderLinearProgressWithLabel
+                                variant="determinate"
+                                value={row[key as keyof Data] as number}
+                              />
                             </TableCell>
                           );
                         }
@@ -141,13 +139,13 @@ const EnhancedTable: FC<TableProps> = ({rows, headerCells, defaultSortColumn}) =
                 <TableRow
                   style={{height: (dense ? 33 : 53) * emptyRows}}
                 >
-                  <TableCell colSpan={6} />
+                  <TableCell colSpan={6}/>
                 </TableRow>
               )}
             </TableBody>
           </Table>
         </TableContainer>
-        <TablePagination
+        {isPagingEnabled ? <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
           count={rows.length}
@@ -155,7 +153,7 @@ const EnhancedTable: FC<TableProps> = ({rows, headerCells, defaultSortColumn}) =
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-        />
+        /> : null}
       </Paper>
     </Box>
   );
