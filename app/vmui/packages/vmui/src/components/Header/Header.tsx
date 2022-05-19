@@ -1,4 +1,4 @@
-import React, {FC, useState} from "preact/compat";
+import React, {FC, useMemo, useState} from "preact/compat";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
@@ -12,7 +12,9 @@ import GlobalSettings from "../CustomPanel/Configurator/Settings/GlobalSettings"
 import {Link as RouterLink, useLocation, useNavigate} from "react-router-dom";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import router from "../../router/index";
+import router, {RouterOptions, routerOptions} from "../../router/index";
+import DatePicker from "../Main/DatePicker/DatePicker";
+import {useCardinalityState, useCardinalityDispatch} from "../../state/cardinality/CardinalityStateContext";
 
 const classes = {
   logo: {
@@ -54,10 +56,17 @@ const classes = {
 
 const Header: FC = () => {
 
+  const {date} = useCardinalityState();
+  const cardinalityDispatch = useCardinalityDispatch();
+
   const {search, pathname} = useLocation();
   const navigate = useNavigate();
 
   const [activeMenu, setActiveMenu] = useState(pathname);
+
+  const headerSetup = useMemo(() => {
+    return ((routerOptions[pathname] || {}) as RouterOptions).header || {};
+  }, [pathname]);
 
   const onClickLogo = () => {
     navigateHandler(router.home);
@@ -97,9 +106,15 @@ const Header: FC = () => {
         </Tabs>
       </Box>
       <Box display="grid" gridTemplateColumns="repeat(3, auto)" gap={1} alignItems="center" ml="auto" mr={0}>
-        <TimeSelector/>
-        <ExecutionControls/>
-        <GlobalSettings/>
+        {headerSetup?.timeSelector && <TimeSelector/>}
+        {headerSetup?.datePicker && (
+          <DatePicker
+            date={date}
+            onChange={(val) => cardinalityDispatch({type: "SET_DATE", payload: val})}
+          />
+        )}
+        {headerSetup?.executionControls && <ExecutionControls/>}
+        {headerSetup?.globalSettings && <GlobalSettings/>}
       </Box>
     </Toolbar>
   </AppBar>;

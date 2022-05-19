@@ -7,8 +7,7 @@ import {defaultHeadCells, headCellsWithProgress, labels} from "./consts";
 import {progressCount, typographyValues} from "./helpers";
 import {Data} from "../Table/types";
 import BarChart from "../BarChart/BarChart";
-
-
+import CardinalityConfigurator from "./CardinalityConfigurator/CardinalityConfigurator";
 
 const CardinalityPanel: FC = () => {
 
@@ -21,52 +20,56 @@ const CardinalityPanel: FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Grid container spacing={2} sx={{px: 2}}>
-      <Grid item xs={12} md={12} lg={12}>
-        <Typography gutterBottom variant="h4" component="h4">
-          Head Stats
-        </Typography>
-        <EnhancedTable
-          rows={headsStats}
-          headerCells={defaultHeadCells}
-          defaultSortColumn={"value"}
-        />
+    <>
+      <CardinalityConfigurator/>
+      <Grid container spacing={2} sx={{px: 2}}>
+        <Grid item xs={12} md={12} lg={12}>
+          <Typography gutterBottom variant="h4" component="h4">
+            Head Stats
+          </Typography>
+          <EnhancedTable
+            rows={headsStats}
+            headerCells={defaultHeadCells}
+            defaultSortColumn={"value"}
+          />
+        </Grid>
+        {Object.keys(tsdbStatus).map((key ) => {
+          if (key == "headsStats") {
+            return null;
+          }
+          const typographyFn = typographyValues[key];
+          const numberOfValues = tsdbStatus[key as keyof TSDBStatus] as TopHeapEntry[];
+          const rows = tsdbStatus[key as keyof TSDBStatus] as unknown as Data[];
+          rows.forEach((row) => progressCount(tsdbStatus.headsStats, key, row));
+          return (
+            <>
+              <Grid item xs={6} md={6} lg={6} key={key}>
+                <Typography gutterBottom variant="h4" component="h4">
+                  {typographyFn(numberOfValues.length)}
+                </Typography>
+                <EnhancedTable
+                  rows={rows}
+                  headerCells={headCellsWithProgress}
+                  defaultSortColumn={"value"}
+                />
+              </Grid>
+              <Grid xs={6} md={6} lg={6} key={key} ref={containerRef}>
+                <div style={{width: "100%"}} ref={containerRef}>
+                  {containerRef?.current &&
+                    <BarChart  data={[
+                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                      // @ts-ignore
+                      rows.map((v) => v.name),
+                      rows.map((v) => v.value),
+                      rows.map((_, i) => i % 12 == 0 ? 1 : i % 10 == 0 ? 2 : 0),
+                    ]} container={containerRef?.current} />}
+                </div>
+              </Grid>
+            </>
+          );
+        })}
       </Grid>
-      {Object.keys(tsdbStatus).map((key ) => {
-        if (key == "headsStats") {
-          return null;
-        }
-        const typographyFn = typographyValues[key];
-        const numberOfValues = tsdbStatus[key as keyof TSDBStatus] as TopHeapEntry[];
-        const rows = tsdbStatus[key as keyof TSDBStatus] as unknown as Data[];
-        rows.forEach((row) => progressCount(tsdbStatus.headsStats, key, row));
-        return (
-          <>
-            <Grid item xs={6} md={6} lg={6} key={key}>
-              <Typography gutterBottom variant="h4" component="h4">
-                {typographyFn(numberOfValues.length)}
-              </Typography>
-              <EnhancedTable
-                rows={rows}
-                headerCells={headCellsWithProgress}
-                defaultSortColumn={"value"}
-              />
-            </Grid>
-            <Grid xs={6} md={6} lg={6} key={key} ref={containerRef}>
-              <div style={{width: "100%"}} ref={containerRef}>
-                {containerRef?.current &&
-                  <BarChart  data={[
-                    // @ts-ignore
-                    rows.map((v) => v.name),
-                    rows.map((v) => v.value),
-                    rows.map((_, i) => i % 12 == 0 ? 1 : i % 10 == 0 ? 2 : 0),
-                  ]} container={containerRef?.current} />}
-              </div>
-            </Grid>
-          </>
-        );
-      })}
-    </Grid>
+    </>
   );
 };
 

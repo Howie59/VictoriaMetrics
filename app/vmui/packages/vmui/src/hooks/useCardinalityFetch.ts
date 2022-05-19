@@ -4,6 +4,7 @@ import {useEffect, useState} from "preact/compat";
 import {getCardinalityInfo} from "../api/tsdb";
 import {getAppModeEnable, getAppModeParams} from "../utils/app-mode";
 import {TSDBStatus} from "../components/CardinalityPanel/types";
+import {useCardinalityState} from "../state/cardinality/CardinalityStateContext";
 
 interface FetchQueryParams {
   visible: boolean
@@ -20,7 +21,9 @@ export const useFetchQuery = ({visible}: FetchQueryParams): {
   error?: ErrorTypes | string
   tsdbStatus: TSDBStatus,
 } => {
-//  console.log("APP STATE =>", useAppState());
+  const {topN, extraLabel, match, date, runQuery} = useCardinalityState();
+
+  //  console.log("APP STATE =>", useAppState());
   const {serverUrl, queryControls: {nocache}} = useAppState();
   const [queryOptions, setQueryOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,7 +40,7 @@ export const useFetchQuery = ({visible}: FetchQueryParams): {
     labelValueCountByLabelName: [], // [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
     seriesCountByLabelValuePair: [], // (10) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
     seriesCountByMetricName: []
-  })
+  });
 
   useEffect(() => {
     if (error) {
@@ -68,7 +71,7 @@ export const useFetchQuery = ({visible}: FetchQueryParams): {
           labelValueCountByLabelName: data.labelValueCountByLabelName,
           seriesCountByLabelValuePair: data.seriesCountByLabelValuePair,
           seriesCountByMetricName: data.seriesCountByMetricName,
-        })
+        });
         setQueryOptions(resp.data);
       }
     } catch (e) {
@@ -101,6 +104,11 @@ export const useFetchQuery = ({visible}: FetchQueryParams): {
   useEffect(() => {
     fetchCardinalityInfo();
   }, [serverUrl]);
+
+  useEffect(() => {
+    // TODO run fetch
+    console.table({topN, extraLabel, match, date});
+  }, [runQuery]);
 
   // return { fetchUrl, isLoading, graphData, liveData, error, queryOptions: queryOptions };
 

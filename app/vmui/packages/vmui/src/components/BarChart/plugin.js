@@ -1,3 +1,4 @@
+/* eslint-disable */
 import uPlot from "uplot";
 
 export const seriesBarsPlugin = (opts) => {
@@ -15,7 +16,7 @@ export const seriesBarsPlugin = (opts) => {
 
   setPxRatio();
 
-  window.addEventListener('dppxchange', setPxRatio);
+  window.addEventListener("dppxchange", setPxRatio);
 
   const ori        = opts.ori;
   const dir        = opts.dir;
@@ -292,7 +293,7 @@ export const seriesBarsPlugin = (opts) => {
       });
     }
   };
-}
+};
 
 function roundDec(val, dec) {
   return Math.round(val * (dec = 10**dec)) / dec;
@@ -350,7 +351,7 @@ function Quadtree(x, y, w, h, l) {
   t.l = l || 0;
   t.o = [];
   t.q = null;
-};
+}
 
 const proto = {
   split: function() {
