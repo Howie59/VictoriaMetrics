@@ -27,17 +27,41 @@ func StreamTSDBStatusResponse(qw422016 *qt422016.Writer, status *storage.TSDBSta
 //line app/vmselect/prometheus/tsdb_status_response.qtpl:5
 	qw422016.N().S(`{"status":"success","headsStats": {"numSeries":`)
 //line app/vmselect/prometheus/tsdb_status_response.qtpl:9
-	qw422016.N().DUL(status.HeadStats.NumberOfSeries)
+	if status.HeadStats != nil {
+//line app/vmselect/prometheus/tsdb_status_response.qtpl:9
+		qw422016.N().DUL(status.HeadStats.NumberOfSeries)
+//line app/vmselect/prometheus/tsdb_status_response.qtpl:9
+	} else {
+//line app/vmselect/prometheus/tsdb_status_response.qtpl:9
+		qw422016.N().D(0)
+//line app/vmselect/prometheus/tsdb_status_response.qtpl:9
+	}
 //line app/vmselect/prometheus/tsdb_status_response.qtpl:9
 	qw422016.N().S(`,"numOfLabelPairs":`)
 //line app/vmselect/prometheus/tsdb_status_response.qtpl:10
-	qw422016.N().DUL(status.HeadStats.NumberOfLabelValue)
+	if status.HeadStats != nil {
+//line app/vmselect/prometheus/tsdb_status_response.qtpl:10
+		qw422016.N().DUL(status.HeadStats.NumberOfLabelValue)
+//line app/vmselect/prometheus/tsdb_status_response.qtpl:10
+	} else {
+//line app/vmselect/prometheus/tsdb_status_response.qtpl:10
+		qw422016.N().D(0)
+//line app/vmselect/prometheus/tsdb_status_response.qtpl:10
+	}
 //line app/vmselect/prometheus/tsdb_status_response.qtpl:10
 	qw422016.N().S(`,"numberOfLabelsValuePairs":`)
 //line app/vmselect/prometheus/tsdb_status_response.qtpl:11
-	qw422016.N().DUL(status.HeadStats.NumberOfLabelsValuePairs)
+	if status.HeadStats != nil {
 //line app/vmselect/prometheus/tsdb_status_response.qtpl:11
-	qw422016.N().S(`},"data":{"seriesCountByMetricName":`)
+		qw422016.N().DUL(status.HeadStats.NumberOfLabelsValuePairs)
+//line app/vmselect/prometheus/tsdb_status_response.qtpl:11
+	} else {
+//line app/vmselect/prometheus/tsdb_status_response.qtpl:11
+		qw422016.N().D(0)
+//line app/vmselect/prometheus/tsdb_status_response.qtpl:11
+	}
+//line app/vmselect/prometheus/tsdb_status_response.qtpl:11
+	qw422016.N().S(`,},"data":{"seriesCountByMetricName":`)
 //line app/vmselect/prometheus/tsdb_status_response.qtpl:14
 	streamtsdbStatusEntries(qw422016, status.SeriesCountByMetricName)
 //line app/vmselect/prometheus/tsdb_status_response.qtpl:14
