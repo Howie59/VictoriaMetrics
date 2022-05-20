@@ -1,7 +1,7 @@
 import {ErrorTypes} from "../types";
 import {useAppState} from "../state/common/StateContext";
 import {useEffect, useState} from "preact/compat";
-import {getCardinalityInfo} from "../api/tsdb";
+import {CardinalityRequestsParams, getCardinalityInfo} from "../api/tsdb";
 import {getAppModeEnable, getAppModeParams} from "../utils/app-mode";
 import {TSDBStatus} from "../components/CardinalityPanel/types";
 import {useCardinalityState} from "../state/cardinality/CardinalityStateContext";
@@ -9,11 +9,20 @@ import {useCardinalityState} from "../state/cardinality/CardinalityStateContext"
 interface FetchQueryParams {
   visible: boolean
   headsData: any,
-
 }
 
 const appModeEnable = getAppModeEnable();
 const {serverURL: appServerUrl} = getAppModeParams();
+const defaultTSDBStatus = {
+  headsStats: {
+    numOfLabelPairs: 0,
+    numSeries: 0,
+    numberOfLabelsValuePairs: 0,
+  },
+  labelValueCountByLabelName: [],
+  seriesCountByLabelValuePair: [],
+  seriesCountByMetricName: []
+};
 
 export const useFetchQuery = ({visible}: FetchQueryParams): {
   fetchUrl?: string[],
@@ -23,94 +32,48 @@ export const useFetchQuery = ({visible}: FetchQueryParams): {
 } => {
   const {topN, extraLabel, match, date, runQuery} = useCardinalityState();
 
-  //  console.log("APP STATE =>", useAppState());
   const {serverUrl, queryControls: {nocache}} = useAppState();
   const [queryOptions, setQueryOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  // const [graphData, setGraphData] = useState<MetricResult[]>();
-  // const [liveData, setLiveData] = useState<InstantMetricResult[]>();
   const [error, setError] = useState<ErrorTypes | string>();
-  // const [fetchQueue, setFetchQueue] = useState<AbortController[]>([]);
-  const [tsdbStatus, setTSDBStatus] = useState<TSDBStatus>({
-    headsStats: {
-      numOfLabelPairs: 0,
-      numSeries: 0,
-      numberOfLabelsValuePairs: 0,
-    },
-    labelValueCountByLabelName: [], // [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
-    seriesCountByLabelValuePair: [], // (10) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
-    seriesCountByMetricName: []
-  });
+  const [tsdbStatus, setTSDBStatus] = useState<TSDBStatus>(defaultTSDBStatus);
 
   useEffect(() => {
     if (error) {
-      // setGraphData(undefined);
-      // setLiveData(undefined);
-      console.log("got error =>", error);
+      setTSDBStatus(defaultTSDBStatus);
     }
   }, [error]);
 
-  // const throttledFetchData = useCallback(throttle(fetchData, 1000), []);
-
-
-  const fetchCardinalityInfo = async () => {
+  const fetchCardinalityInfo = async (requestParams: CardinalityRequestsParams) => {
     const server = appModeEnable ? appServerUrl : serverUrl;
     if (!server) return;
-    const url = getCardinalityInfo(server);
+    setIsLoading(true);
+    setTSDBStatus(defaultTSDBStatus);
+    const url = getCardinalityInfo(server, requestParams);
 
     try {
       const response = await fetch(url);
       const resp = await response.json();
       if (response.ok) {
         const {headsStats, data} = resp;
-        console.log("headsStats =>", headsStats);
-        console.log("data =>", data);
-
         setTSDBStatus({
           headsStats: headsStats,
           labelValueCountByLabelName: data.labelValueCountByLabelName,
           seriesCountByLabelValuePair: data.seriesCountByLabelValuePair,
           seriesCountByMetricName: data.seriesCountByMetricName,
         });
-        setQueryOptions(resp.data);
+        setIsLoading(false);
       }
     } catch (e) {
+      setIsLoading(false);
       if (e instanceof Error) setError(`${e.name}: ${e.message}`);
     }
   };
 
-  // const fetchUrl = useMemo(() => {
-  //     const server = appModeEnable ? appServerUrl : serverUrl;
-  //     const expr = predefinedQuery ?? query;
-  //     const displayChart = (display || displayType) === "chart";
-  //     if (!period) return;
-  //     if (!server) {
-  //       setError(ErrorTypes.emptyServer);
-  //     } else if (expr.every(q => !q.trim())) {
-  //       setError(ErrorTypes.validQuery);
-  //     } else if (isValidHttpUrl(server)) {
-  //       const updatedPeriod = {...period};
-  //       if (customStep.enable) updatedPeriod.step = customStep.value;
-  //       return expr.filter(q => q.trim()).map(q => displayChart
-  //         ? getQueryRangeUrl(server, q, updatedPeriod, nocache)
-  //         : getQueryUrl(server, q, updatedPeriod));
-  //     } else {
-  //       setError(ErrorTypes.validServer);
-  //     }
-  //   },
-  //   [serverUrl, period, displayType, customStep]);
-
 
   useEffect(() => {
-    fetchCardinalityInfo();
-  }, [serverUrl]);
+    fetchCardinalityInfo({topN, extraLabel, match, date});
+  }, [serverUrl, runQuery]);
 
-  useEffect(() => {
-    // TODO run fetch
-    console.table({topN, extraLabel, match, date});
-  }, [runQuery]);
-
-  // return { fetchUrl, isLoading, graphData, liveData, error, queryOptions: queryOptions };
-
-  return {isLoading, tsdbStatus};
+  return {isLoading, tsdbStatus, error};
 };

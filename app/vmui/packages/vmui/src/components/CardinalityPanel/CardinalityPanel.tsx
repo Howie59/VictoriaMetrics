@@ -9,6 +9,7 @@ import {Data} from "../Table/types";
 import BarChart from "../BarChart/BarChart";
 import CardinalityConfigurator from "./CardinalityConfigurator/CardinalityConfigurator";
 import {barOptions} from "../BarChart/consts";
+import Spinner from "../common/Spinner";
 
 const CardinalityPanel: FC = () => {
 
@@ -22,6 +23,7 @@ const CardinalityPanel: FC = () => {
 
   return (
     <>
+      {isLoading && <Spinner isLoading={isLoading} height={"800px"} />}
       <CardinalityConfigurator/>
       <Grid container spacing={2} sx={{px: 2}}>
         <Grid item xs={12} md={12} lg={12}>
@@ -54,19 +56,16 @@ const CardinalityPanel: FC = () => {
                   defaultSortColumn={"value"}
                 />
               </Grid>
-              <Grid xs={6} md={6} lg={6} key={key} ref={containerRef}>
-                <div style={{width: "100%"}} ref={containerRef}>
-                  {containerRef?.current &&
+              <Grid xs={6} md={6} lg={6} key={key}>
+                <div style={{width: "100%", paddingTop: "20px"}} ref={containerRef}>
+                  {containerRef?.current && !isLoading ?
                     <BarChart  data={[
                       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                       // @ts-ignore
                       rows.map((v) => v.name),
                       rows.map((v) => v.value),
                       rows.map((_, i) => i % 12 == 0 ? 1 : i % 10 == 0 ? 2 : 0),
-                    ]}
-                    container={containerRef?.current}
-                    configs={barOptions}
-                    />}
+                    ]} container={containerRef?.current} configs={barOptions} /> : null}
                 </div>
               </Grid>
             </>
