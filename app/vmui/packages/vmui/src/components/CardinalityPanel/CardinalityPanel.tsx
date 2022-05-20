@@ -58,7 +58,7 @@ const CardinalityPanel: FC = () => {
                 />
               </Grid>
               <Grid xs={6} md={6} lg={6} key={key}>
-                <div style={{width: "100%", paddingTop: "20px"}} ref={containerRef}>
+                <div style={{width: "100%", paddingTop: "40px"}} ref={containerRef}>
                   {containerRef?.current && !isLoading ?
                     <BarChart  data={[
                       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
