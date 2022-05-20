@@ -8,7 +8,7 @@ TSDBStatusResponse generates response for /api/v1/status/tsdb .
 	"headsStats": {
         "numSeries": {% if status.HeadStats != nil %} {%dul status.HeadStats.NumberOfSeries %} {% else %} {%d 0 %} {% endif %},
         "numOfLabelPairs": {% if status.HeadStats != nil %} {%dul status.HeadStats.NumberOfLabelValue %} {% else %} {%d 0 %} {% endif %},
-        "numberOfLabelsValuePairs": {% if status.HeadStats != nil %} {%dul status.HeadStats.NumberOfLabelsValuePairs %} {% else %} {%d 0 %} {% endif %},
+        "numberOfLabelsValuePairs": {% if status.HeadStats != nil %} {%dul status.HeadStats.NumberOfLabelsValuePairs %} {% else %} {%d 0 %} {% endif %}
 	},
 	"data":{
 		"seriesCountByMetricName":{%= tsdbStatusEntries(status.SeriesCountByMetricName) %},

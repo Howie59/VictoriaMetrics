@@ -7,18 +7,14 @@ import {PaddingSide, Series} from "uplot";
 const stroke: Stroke = {
   unit: 3,
   values: (u: { data: number[][]; }) => u.data[2].map((v: number) =>
-    v == 0 ? "#33BB55" :
-      v == 1 ? "#F79420" :
-        "#BB1133"
+    v !== 1 ? "#33BB55" : "#F79420"
   ),
 };
 
 const fill: Fill = {
   unit: 3,
   values: (u: { data: number[][]; }) => u.data[2].map((v: number) =>
-    v == 0 ? "#33BB55A0" :
-      v == 1 ? "#F79420A0" :
-        "#BB1133A0"
+    v !== 1 ? "#33BB55A0" : "#F79420A0"
   ),
 };
 
@@ -26,7 +22,7 @@ export const barOptions = {
   height: 500,
   width: 500,
   padding: [null, 0, null, 0] as [top: PaddingSide, right: PaddingSide, bottom: PaddingSide, left: PaddingSide],
-  axes: [{}, {}],
+  axes: [{ show: false }],
   series: [
     {
       label: "",

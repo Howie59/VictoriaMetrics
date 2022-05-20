@@ -61,7 +61,7 @@ func StreamTSDBStatusResponse(qw422016 *qt422016.Writer, status *storage.TSDBSta
 //line app/vmselect/prometheus/tsdb_status_response.qtpl:11
 	}
 //line app/vmselect/prometheus/tsdb_status_response.qtpl:11
-	qw422016.N().S(`,},"data":{"seriesCountByMetricName":`)
+	qw422016.N().S(`},"data":{"seriesCountByMetricName":`)
 //line app/vmselect/prometheus/tsdb_status_response.qtpl:14
 	streamtsdbStatusEntries(qw422016, status.SeriesCountByMetricName)
 //line app/vmselect/prometheus/tsdb_status_response.qtpl:14

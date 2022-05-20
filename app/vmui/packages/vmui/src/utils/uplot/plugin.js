@@ -197,7 +197,7 @@ export const seriesBarsPlugin = (opts) => {
             return hRect && seriesIdx === hRect.sidx ? hRect.didx : null;
           },
           points: {
-            fill: "rgba(255,255,255, 0.3)",
+            // fill: "rgba(255,255,255, 0.3)",
             bbox: (u, seriesIdx) => {
               let isHovered = hRect && seriesIdx === hRect.sidx;
 

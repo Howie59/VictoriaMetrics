@@ -16,7 +16,7 @@ const BarChart: FC<BarChartProps> = ({
   const options: uPlotOptions ={
     ...configs,
     width: layoutSize.width || 400,
-    height: 400,
+    // height: 400,
   };
 
   const updateChart = (): void => {

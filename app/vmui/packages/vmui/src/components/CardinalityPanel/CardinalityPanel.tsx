@@ -1,5 +1,5 @@
 import React, {FC, useRef} from "preact/compat";
-import {Typography, Grid} from "@mui/material";
+import {Typography, Grid, Alert} from "@mui/material";
 import {useFetchQuery} from "../../hooks/useCardinalityFetch";
 import EnhancedTable from "../Table/Table";
 import {TSDBStatus, HeadStats, TopHeapEntry} from "./types";
@@ -13,7 +13,7 @@ import Spinner from "../common/Spinner";
 
 const CardinalityPanel: FC = () => {
 
-  const {isLoading, tsdbStatus} = useFetchQuery({headsData: undefined, visible: false});
+  const {isLoading, tsdbStatus, error} = useFetchQuery({headsData: undefined, visible: false});
 
   const headsStats = Object.keys(tsdbStatus.headsStats).map((key: string) => {
     return {name: labels[key as keyof HeadStats], value: tsdbStatus.headsStats[key as keyof HeadStats]} as Data;
@@ -25,6 +25,7 @@ const CardinalityPanel: FC = () => {
     <>
       {isLoading && <Spinner isLoading={isLoading} height={"800px"} />}
       <CardinalityConfigurator/>
+      {error && <Alert color="error" severity="error" sx={{whiteSpace: "pre-wrap", mt: 2}}>{error}</Alert>}
       <Grid container spacing={2} sx={{px: 2}}>
         <Grid item xs={12} md={12} lg={12}>
           <Typography gutterBottom variant="h4" component="h4">

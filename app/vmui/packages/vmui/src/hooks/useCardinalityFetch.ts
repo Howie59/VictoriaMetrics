@@ -33,7 +33,6 @@ export const useFetchQuery = ({visible}: FetchQueryParams): {
   const {topN, extraLabel, match, date, runQuery} = useCardinalityState();
 
   const {serverUrl, queryControls: {nocache}} = useAppState();
-  const [queryOptions, setQueryOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrorTypes | string>();
   const [tsdbStatus, setTSDBStatus] = useState<TSDBStatus>(defaultTSDBStatus);
@@ -41,12 +40,14 @@ export const useFetchQuery = ({visible}: FetchQueryParams): {
   useEffect(() => {
     if (error) {
       setTSDBStatus(defaultTSDBStatus);
+      setIsLoading(false);
     }
   }, [error]);
 
   const fetchCardinalityInfo = async (requestParams: CardinalityRequestsParams) => {
     const server = appModeEnable ? appServerUrl : serverUrl;
     if (!server) return;
+    setError("");
     setIsLoading(true);
     setTSDBStatus(defaultTSDBStatus);
     const url = getCardinalityInfo(server, requestParams);
@@ -62,6 +63,10 @@ export const useFetchQuery = ({visible}: FetchQueryParams): {
           seriesCountByLabelValuePair: data.seriesCountByLabelValuePair,
           seriesCountByMetricName: data.seriesCountByMetricName,
         });
+        setIsLoading(false);
+      } else {
+        setError(resp.error);
+        setTSDBStatus(defaultTSDBStatus);
         setIsLoading(false);
       }
     } catch (e) {
