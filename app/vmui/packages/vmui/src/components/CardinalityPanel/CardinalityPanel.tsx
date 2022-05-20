@@ -8,6 +8,7 @@ import {progressCount, typographyValues} from "./helpers";
 import {Data} from "../Table/types";
 import BarChart from "../BarChart/BarChart";
 import CardinalityConfigurator from "./CardinalityConfigurator/CardinalityConfigurator";
+import {barOptions} from "../BarChart/consts";
 
 const CardinalityPanel: FC = () => {
 
@@ -62,7 +63,10 @@ const CardinalityPanel: FC = () => {
                       rows.map((v) => v.name),
                       rows.map((v) => v.value),
                       rows.map((_, i) => i % 12 == 0 ? 1 : i % 10 == 0 ? 2 : 0),
-                    ]} container={containerRef?.current} />}
+                    ]}
+                    container={containerRef?.current}
+                    configs={barOptions}
+                    />}
                 </div>
               </Grid>
             </>

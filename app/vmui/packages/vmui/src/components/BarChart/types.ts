@@ -1,6 +1,7 @@
-import {AlignedData as uPlotData} from "uplot";
+import {AlignedData as uPlotData, Options as uPlotOptions} from "uplot";
 
 export interface BarChartProps {
   data: uPlotData;
-  container: HTMLDivElement | null
+  container: HTMLDivElement | null,
+  configs: uPlotOptions,
 }

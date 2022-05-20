@@ -68,22 +68,13 @@ export const seriesBarsPlugin = (opts) => {
     disp: {
       x0: {
         unit: 2,
-        //	discr: false, (unary, discrete, continuous)
         values: (u, seriesIdx, idx0, idx1) => barsPctLayout[seriesIdx].offs,
       },
       size: {
         unit: 2,
-        //	discr: true,
         values: (u, seriesIdx, idx0, idx1) => barsPctLayout[seriesIdx].size,
       },
       ...opts.disp,
-      /*
-        // e.g. variable size via scale (will compute offsets from known values)
-        x1: {
-          units: 1,
-          values: (u, seriesIdx, idx0, idx1) => bucketEnds[idx],
-        },
-      */
     },
     each: (u, seriesIdx, dataIdx, lft, top, wid, hgt) => {
       // we get back raw canvas coords (included axes & padding). translate to the plotting area origin
@@ -295,7 +286,7 @@ export const seriesBarsPlugin = (opts) => {
   };
 };
 
-function roundDec(val, dec) {
+const roundDec = (val, dec) => {
   return Math.round(val * (dec = 10**dec)) / dec;
 }
 
@@ -305,7 +296,7 @@ const SPACE_EVENLY  = 3;
 
 const coord = (i, offs, iwid, gap) => roundDec(offs + i * (iwid + gap), 6);
 
-function distr(numItems, sizeFactor, justify, onlyIdx, each) {
+const distr = (numItems, sizeFactor, justify, onlyIdx, each) => {
   let space = 1 - sizeFactor;
 
   let gap =  (
@@ -334,7 +325,7 @@ function distr(numItems, sizeFactor, justify, onlyIdx, each) {
     each(onlyIdx, coord(onlyIdx, offs, iwid, gap), _iwid);
 }
 
-function pointWithin(px, py, rlft, rtop, rrgt, rbtm) {
+const pointWithin = (px, py, rlft, rtop, rrgt, rbtm) => {
   return px >= rlft && px <= rrgt && py >= rtop && py <= rbtm;
 }
 
