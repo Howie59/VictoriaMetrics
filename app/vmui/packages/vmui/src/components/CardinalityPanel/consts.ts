@@ -1,6 +1,3 @@
-import {HeadStats, TypographyFunctions} from "./types";
-import {Data} from "../Table/types";
-
 export const defaultHeadCells = [
   {
     disablePadding: false,
@@ -25,6 +22,18 @@ export const headCellsWithProgress = [...defaultHeadCells, {
 
 export const labels = {
   numSeries: "Number of Series",
-  numOfLabelPairs:	"Number of Label Pairs",
-  numberOfLabelsValuePairs: "Number of Label value Pairs",
+  numOfLabelPairs:	"Number of unique Label Pairs",
+  numberOfLabelsValuePairs: "Total series count by lable name",
+};
+
+export const spinnerContainerStyles = (height: string) =>  {
+  return {
+    width: "100%",
+    maxWidth: "100%",
+    position: "absolute",
+    height: height ?? "50%",
+    background: "rgba(255, 255, 255, 0.7)",
+    pointerEvents: "none",
+    zIndex: 1000,
+  };
 };

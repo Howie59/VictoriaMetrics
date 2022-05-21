@@ -1,11 +1,11 @@
 export interface TSDBStatus {
-  headsStats: HeadStats;
+  totalStats: TotalStats;
   labelValueCountByLabelName: TopHeapEntry[]; // [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
   seriesCountByLabelValuePair: TopHeapEntry[]; // (10) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
   seriesCountByMetricName: TopHeapEntry[]
 }
 
-export interface HeadStats {
+export interface TotalStats {
   numOfLabelPairs: number;
   numSeries: number;
   numberOfLabelsValuePairs: number;

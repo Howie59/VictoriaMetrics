@@ -2,8 +2,8 @@ import React, {FC, useRef} from "preact/compat";
 import {Typography, Grid, Alert} from "@mui/material";
 import {useFetchQuery} from "../../hooks/useCardinalityFetch";
 import EnhancedTable from "../Table/Table";
-import {TSDBStatus, HeadStats, TopHeapEntry} from "./types";
-import {defaultHeadCells, headCellsWithProgress, labels} from "./consts";
+import {TSDBStatus, TotalStats, TopHeapEntry} from "./types";
+import {defaultHeadCells, headCellsWithProgress, labels, spinnerContainerStyles} from "./consts";
 import {progressCount, typographyValues} from "./helpers";
 import {Data} from "../Table/types";
 import BarChart from "../BarChart/BarChart";
@@ -13,23 +13,23 @@ import Spinner from "../common/Spinner";
 
 const CardinalityPanel: FC = () => {
 
-  const {isLoading, tsdbStatus, error} = useFetchQuery({headsData: undefined, visible: false});
+  const {isLoading, tsdbStatus, error} = useFetchQuery();
 
-  const headsStats = Object.keys(tsdbStatus.headsStats).map((key: string) => {
-    return {name: labels[key as keyof HeadStats], value: tsdbStatus.headsStats[key as keyof HeadStats]} as Data;
+  const headsStats = Object.keys(tsdbStatus.totalStats).map((key: string) => {
+    return {name: labels[key as keyof TotalStats], value: tsdbStatus.totalStats[key as keyof TotalStats]} as Data;
   });
 
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
     <>
-      {isLoading && <Spinner isLoading={isLoading} height={"800px"} />}
+      {isLoading && <Spinner isLoading={isLoading} height={"800px"} containerStyles={spinnerContainerStyles("100%")} />}
       <CardinalityConfigurator/>
       {error && <Alert color="error" severity="error" sx={{whiteSpace: "pre-wrap", mt: 2}}>{error}</Alert>}
       <Grid container spacing={2} sx={{px: 2}}>
         <Grid item xs={12} md={12} lg={12}>
           <Typography gutterBottom variant="h4" component="h4">
-            Head Stats
+            Total Statistic
           </Typography>
           <EnhancedTable
             rows={headsStats}
@@ -38,13 +38,13 @@ const CardinalityPanel: FC = () => {
           />
         </Grid>
         {Object.keys(tsdbStatus).map((key ) => {
-          if (key == "headsStats") {
+          if (key == "totalStats") {
             return null;
           }
           const typographyFn = typographyValues[key];
           const numberOfValues = tsdbStatus[key as keyof TSDBStatus] as TopHeapEntry[];
           const rows = tsdbStatus[key as keyof TSDBStatus] as unknown as Data[];
-          rows.forEach((row) => progressCount(tsdbStatus.headsStats, key, row));
+          rows.forEach((row) => progressCount(tsdbStatus.totalStats, key, row));
           return (
             <>
               <Grid item xs={6} md={6} lg={6} key={key}>

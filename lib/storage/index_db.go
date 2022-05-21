@@ -1469,7 +1469,7 @@ func (is *indexSearch) getTSDBStatusWithFiltersForDate(tfss []*TagFilters, date 
 		return nil, fmt.Errorf("error when counting total time series: %w", err)
 	}
 	status := &TSDBStatus{
-		HeadStats: &HeadStats{
+		TotalStats: &TotalStats{
 			NumberOfSeries:           count,
 			NumberOfLabelValue:       totalLabelValueCountByLabelName,
 			NumberOfLabelsValuePairs: totalSeriesCountByLabelValuePair,
@@ -1485,13 +1485,13 @@ func (is *indexSearch) getTSDBStatusWithFiltersForDate(tfss []*TagFilters, date 
 //
 // See https://prometheus.io/docs/prometheus/latest/querying/api/#tsdb-stats
 type TSDBStatus struct {
-	HeadStats                   *HeadStats
+	TotalStats                  *TotalStats
 	SeriesCountByMetricName     []TopHeapEntry
 	LabelValueCountByLabelName  []TopHeapEntry
 	SeriesCountByLabelValuePair []TopHeapEntry
 }
 
-type HeadStats struct {
+type TotalStats struct {
 	NumberOfSeries           uint64
 	NumberOfLabelValue       uint64
 	NumberOfLabelsValuePairs uint64

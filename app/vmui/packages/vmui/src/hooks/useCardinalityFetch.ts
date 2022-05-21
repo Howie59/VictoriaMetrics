@@ -6,15 +6,10 @@ import {getAppModeEnable, getAppModeParams} from "../utils/app-mode";
 import {TSDBStatus} from "../components/CardinalityPanel/types";
 import {useCardinalityState} from "../state/cardinality/CardinalityStateContext";
 
-interface FetchQueryParams {
-  visible: boolean
-  headsData: any,
-}
-
 const appModeEnable = getAppModeEnable();
 const {serverURL: appServerUrl} = getAppModeParams();
 const defaultTSDBStatus = {
-  headsStats: {
+  totalStats: {
     numOfLabelPairs: 0,
     numSeries: 0,
     numberOfLabelsValuePairs: 0,
@@ -24,7 +19,7 @@ const defaultTSDBStatus = {
   seriesCountByMetricName: []
 };
 
-export const useFetchQuery = ({visible}: FetchQueryParams): {
+export const useFetchQuery = (): {
   fetchUrl?: string[],
   isLoading: boolean,
   error?: ErrorTypes | string
@@ -32,7 +27,7 @@ export const useFetchQuery = ({visible}: FetchQueryParams): {
 } => {
   const {topN, extraLabel, match, date, runQuery} = useCardinalityState();
 
-  const {serverUrl, queryControls: {nocache}} = useAppState();
+  const {serverUrl} = useAppState();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrorTypes | string>();
   const [tsdbStatus, setTSDBStatus] = useState<TSDBStatus>(defaultTSDBStatus);
@@ -56,9 +51,9 @@ export const useFetchQuery = ({visible}: FetchQueryParams): {
       const response = await fetch(url);
       const resp = await response.json();
       if (response.ok) {
-        const {headsStats, data} = resp;
+        const {totalStats, data} = resp;
         setTSDBStatus({
-          headsStats: headsStats,
+          totalStats: totalStats,
           labelValueCountByLabelName: data.labelValueCountByLabelName,
           seriesCountByLabelValuePair: data.seriesCountByLabelValuePair,
           seriesCountByMetricName: data.seriesCountByMetricName,

@@ -5,10 +5,10 @@ TSDBStatusResponse generates response for /api/v1/status/tsdb .
 {% func TSDBStatusResponse(status *storage.TSDBStatus) %}
 {
 	"status":"success",
-	"headsStats": {
-        "numSeries": {% if status.HeadStats != nil %} {%dul status.HeadStats.NumberOfSeries %} {% else %} {%d 0 %} {% endif %},
-        "numOfLabelPairs": {% if status.HeadStats != nil %} {%dul status.HeadStats.NumberOfLabelValue %} {% else %} {%d 0 %} {% endif %},
-        "numberOfLabelsValuePairs": {% if status.HeadStats != nil %} {%dul status.HeadStats.NumberOfLabelsValuePairs %} {% else %} {%d 0 %} {% endif %}
+	"totalStats": {
+        "numSeries": {% if status.TotalStats != nil %} {%dul status.TotalStats.NumberOfSeries %} {% else %} {%d 0 %} {% endif %},
+        "numOfLabelPairs": {% if status.TotalStats != nil %} {%dul status.TotalStats.NumberOfLabelValue %} {% else %} {%d 0 %} {% endif %},
+        "numberOfLabelsValuePairs": {% if status.TotalStats != nil %} {%dul status.TotalStats.NumberOfLabelsValuePairs %} {% else %} {%d 0 %} {% endif %}
 	},
 	"data":{
 		"seriesCountByMetricName":{%= tsdbStatusEntries(status.SeriesCountByMetricName) %},
