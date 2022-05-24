@@ -1365,8 +1365,7 @@ func (is *indexSearch) getTSDBStatusWithFiltersForDate(tfss []*TagFilters, date 
 	thSeriesCountByLabelValuePair := newTopHeap(topN)
 	thSeriesCountByMetricName := newTopHeap(topN)
 	var tmp, labelName, labelNameValue []byte
-	var labelValueCountByLabelName, seriesCountByLabelValuePair uint64
-	var totalLabelValueCountByLabelName, totalSeriesCountByLabelValuePair, totalSeriesCountByMetricName uint64
+	var labelValueCountByLabelName, seriesCountByLabelValuePair, totalSeriesCountByMetricName uint64
 	nameEqualBytes := []byte("__name__=")
 
 	loopsPaceLimiter := 0
@@ -1423,7 +1422,6 @@ func (is *indexSearch) getTSDBStatusWithFiltersForDate(tfss []*TagFilters, date 
 			tmp = append(tmp, "__name__"...)
 		}
 		if !bytes.Equal(tmp, labelName) {
-			totalLabelValueCountByLabelName += labelValueCountByLabelName
 			thLabelValueCountByLabelName.pushIfNonEmpty(labelName, labelValueCountByLabelName)
 			labelValueCountByLabelName = 0
 			labelName = append(labelName[:0], tmp...)
@@ -1434,14 +1432,12 @@ func (is *indexSearch) getTSDBStatusWithFiltersForDate(tfss []*TagFilters, date 
 			return nil, fmt.Errorf("cannot unmarshal tag value from line %q: %w", item, err)
 		}
 		if !bytes.Equal(tmp, labelNameValue) {
-			totalSeriesCountByLabelValuePair += seriesCountByLabelValuePair
 			thSeriesCountByLabelValuePair.pushIfNonEmpty(labelNameValue, seriesCountByLabelValuePair)
 			if bytes.HasPrefix(labelNameValue, nameEqualBytes) {
 				thSeriesCountByMetricName.pushIfNonEmpty(labelNameValue[len(nameEqualBytes):], seriesCountByLabelValuePair)
 			}
 			seriesCountByLabelValuePair = 0
 			labelValueCountByLabelName++
-			totalLabelValueCountByLabelName += labelValueCountByLabelName
 			labelNameValue = append(labelNameValue[:0], tmp...)
 		}
 		if filter == nil {
@@ -1469,14 +1465,10 @@ func (is *indexSearch) getTSDBStatusWithFiltersForDate(tfss []*TagFilters, date 
 		return nil, fmt.Errorf("error when counting total time series: %w", err)
 	}
 	status := &TSDBStatus{
-		TotalStats: &TotalStats{
-			NumberOfSeries:           count,
-			NumberOfLabelValue:       totalLabelValueCountByLabelName,
-			NumberOfLabelsValuePairs: totalSeriesCountByLabelValuePair,
-		},
 		SeriesCountByMetricName:     thSeriesCountByMetricName.getSortedResult(),
 		LabelValueCountByLabelName:  thLabelValueCountByLabelName.getSortedResult(),
 		SeriesCountByLabelValuePair: thSeriesCountByLabelValuePair.getSortedResult(),
+		NumberOfSeries:              count,
 	}
 	return status, nil
 }
@@ -1485,16 +1477,10 @@ func (is *indexSearch) getTSDBStatusWithFiltersForDate(tfss []*TagFilters, date 
 //
 // See https://prometheus.io/docs/prometheus/latest/querying/api/#tsdb-stats
 type TSDBStatus struct {
-	TotalStats                  *TotalStats
 	SeriesCountByMetricName     []TopHeapEntry
 	LabelValueCountByLabelName  []TopHeapEntry
 	SeriesCountByLabelValuePair []TopHeapEntry
-}
-
-type TotalStats struct {
-	NumberOfSeries           uint64
-	NumberOfLabelValue       uint64
-	NumberOfLabelsValuePairs uint64
+	NumberOfSeries              uint64
 }
 
 func (status *TSDBStatus) hasEntries() bool {

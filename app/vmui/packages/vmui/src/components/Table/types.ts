@@ -1,5 +1,4 @@
 import {ChangeEvent, MouseEvent} from "react";
-import {TotalStats, TopHeapEntry} from "../CardinalityPanel/types";
 
 export type Order = "asc" | "desc";
 

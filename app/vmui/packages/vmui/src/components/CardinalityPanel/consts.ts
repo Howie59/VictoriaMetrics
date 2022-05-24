@@ -23,7 +23,7 @@ export const headCellsWithProgress = [...defaultHeadCells, {
 export const labels = {
   numSeries: "Number of Series",
   numOfLabelPairs:	"Number of unique Label Pairs",
-  numberOfLabelsValuePairs: "Total series count by lable name",
+  numberOfLabelsValuePairs: "Total series count by label name",
 };
 
 export const spinnerContainerStyles = (height: string) =>  {

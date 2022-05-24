@@ -1,14 +1,10 @@
-export interface TSDBStatus {
-  totalStats: TotalStats;
-  labelValueCountByLabelName: TopHeapEntry[]; // [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
-  seriesCountByLabelValuePair: TopHeapEntry[]; // (10) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
-  seriesCountByMetricName: TopHeapEntry[]
-}
+import {MutableRef} from "preact/hooks";
 
-export interface TotalStats {
-  numOfLabelPairs: number;
+export interface TSDBStatus {
+  labelValueCountByLabelName: TopHeapEntry[];
+  seriesCountByLabelValuePair: TopHeapEntry[];
+  seriesCountByMetricName: TopHeapEntry[];
   numSeries: number;
-  numberOfLabelsValuePairs: number;
 }
 
 export interface TopHeapEntry {
@@ -18,4 +14,22 @@ export interface TopHeapEntry {
 
 export type TypographyFunctions = {
   [key: string]: (value: number) => string,
+}
+
+export interface Tabs {
+  labelValueCountByLabelName: string[];
+  seriesCountByLabelValuePair: string[];
+  seriesCountByMetricName: string[];
+}
+
+export interface Containers<T> {
+  labelValueCountByLabelName: MutableRef<T>;
+  seriesCountByLabelValuePair: MutableRef<T>;
+  seriesCountByMetricName: MutableRef<T>;
+}
+
+export interface DefaultState {
+  labelValueCountByLabelName: number;
+  seriesCountByLabelValuePair: number;
+  seriesCountByMetricName: number;
 }

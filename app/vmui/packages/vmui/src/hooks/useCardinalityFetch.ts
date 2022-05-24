@@ -9,14 +9,10 @@ import {useCardinalityState} from "../state/cardinality/CardinalityStateContext"
 const appModeEnable = getAppModeEnable();
 const {serverURL: appServerUrl} = getAppModeParams();
 const defaultTSDBStatus = {
-  totalStats: {
-    numOfLabelPairs: 0,
-    numSeries: 0,
-    numberOfLabelsValuePairs: 0,
-  },
   labelValueCountByLabelName: [],
   seriesCountByLabelValuePair: [],
-  seriesCountByMetricName: []
+  seriesCountByMetricName: [],
+  numSeries: 0,
 };
 
 export const useFetchQuery = (): {
@@ -51,13 +47,8 @@ export const useFetchQuery = (): {
       const response = await fetch(url);
       const resp = await response.json();
       if (response.ok) {
-        const {totalStats, data} = resp;
-        setTSDBStatus({
-          totalStats: totalStats,
-          labelValueCountByLabelName: data.labelValueCountByLabelName,
-          seriesCountByLabelValuePair: data.seriesCountByLabelValuePair,
-          seriesCountByMetricName: data.seriesCountByMetricName,
-        });
+        const {data} = resp;
+        setTSDBStatus({ ...data });
         setIsLoading(false);
       } else {
         setError(resp.error);
@@ -73,7 +64,7 @@ export const useFetchQuery = (): {
 
   useEffect(() => {
     fetchCardinalityInfo({topN, extraLabel, match, date});
-  }, [serverUrl, runQuery]);
+  }, [serverUrl, runQuery, date]);
 
   return {isLoading, tsdbStatus, error};
 };

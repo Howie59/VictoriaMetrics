@@ -17,7 +17,7 @@ const CardinalityConfigurator: FC = () => {
   const dispatch = useAppDispatch();
   const cardinalityDispatch = useCardinalityDispatch();
 
-  const {topN, extraLabel, match} = useCardinalityState();
+  const {topN, match} = useCardinalityState();
 
   const {queryOptions} = useFetchQueryOptions();
   const error = "";
@@ -78,18 +78,6 @@ const CardinalityConfigurator: FC = () => {
           helperText={topN < 1 ? "Number can't be less than zero" : " "}
           onChange={(e) => {
             cardinalityDispatch({type: "SET_TOP_N", payload: +e.target.value});
-          }}/>
-      </Box>
-      <Box ml={2} flexGrow={1}>
-        <TextField
-          label="Extra label"
-          fullWidth
-          type="text"
-          size="small"
-          variant="outlined"
-          value={extraLabel}
-          onChange={(e) => {
-            cardinalityDispatch({type: "SET_EXTRA_LABEL", payload: e.target.value});
           }}/>
       </Box>
     </Box>
