@@ -62,19 +62,17 @@ const CardinalityPanel: FC = () => {
                         rows={rows}
                         headerCells={key == "seriesCountByMetricName" ? headCellsWithProgress : defaultHeadCells}
                         defaultSortColumn={"value"}
-                      />: <Box>
-                        <BarChart
-                          data={[
-                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                            // @ts-ignore
-                            rows.map((v) => v.name),
-                            rows.map((v) => v.value),
-                            rows.map((_, i) => i % 12 == 0 ? 1 : i % 10 == 0 ? 2 : 0),
-                          ]}
-                          container={defaultProps.containerRefs[key as keyof Containers<HTMLDivElement>]?.current}
-                          configs={barOptions}
-                        />
-                      </Box>}
+                      />: <BarChart
+                        data={[
+                          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                          // @ts-ignore
+                          rows.map((v) => v.name),
+                          rows.map((v) => v.value),
+                          rows.map((_, i) => i % 12 == 0 ? 1 : i % 10 == 0 ? 2 : 0),
+                        ]}
+                        container={defaultProps.containerRefs[key as keyof Containers<HTMLDivElement>]?.current}
+                        configs={barOptions}
+                      />}
                     </TabPanel>
                   </div>
                 )}
