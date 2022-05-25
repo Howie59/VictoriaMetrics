@@ -1,4 +1,4 @@
-import {ChangeEvent, MouseEvent} from "react";
+import {ChangeEvent, MouseEvent, SyntheticEvent} from "react";
 
 export type Order = "asc" | "desc";
 
@@ -24,7 +24,9 @@ export interface TableProps {
   headerCells: HeadCell[],
   defaultSortColumn: keyof Data,
   isPagingEnabled?: boolean,
+  onRowClick?: (event: SyntheticEvent, name: string) => void,
 }
+
 
 export interface Data {
   name: string;

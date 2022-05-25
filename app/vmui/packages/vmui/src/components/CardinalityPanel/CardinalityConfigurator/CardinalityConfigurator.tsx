@@ -1,4 +1,4 @@
-import React, {FC, useState} from "react";
+import React, {ChangeEvent, FC} from "react";
 import Box from "@mui/material/Box";
 import QueryEditor from "../../CustomPanel/Configurator/Query/QueryEditor";
 import Tooltip from "@mui/material/Tooltip";
@@ -9,40 +9,30 @@ import {useAppDispatch, useAppState} from "../../../state/common/StateContext";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import BasicSwitch from "../../../theme/switch";
 import {saveToStorage} from "../../../utils/storage";
-import {useCardinalityDispatch, useCardinalityState} from "../../../state/cardinality/CardinalityStateContext";
 import TextField from "@mui/material/TextField";
+import {ErrorTypes} from "../../../types";
 
-const CardinalityConfigurator: FC = () => {
+export interface CardinalityConfiguratorProps {
+  onSetHistory: (step: number, index: number) => void;
+  onSetQuery: (query: string, index: number) => void;
+  onRunQuery: () => void;
+  onTopNChange: (e: ChangeEvent<HTMLTextAreaElement|HTMLInputElement>) => void;
+  query: string;
+  topN: number;
+  error?: ErrorTypes | string;
+}
 
+const CardinalityConfigurator: FC<CardinalityConfiguratorProps> = ({
+  topN,
+  error,
+  query,
+  onSetHistory,
+  onRunQuery,
+  onSetQuery,
+  onTopNChange }) => {
   const dispatch = useAppDispatch();
-  const cardinalityDispatch = useCardinalityDispatch();
-
-  const {topN, match} = useCardinalityState();
-
-  const {queryOptions} = useFetchQueryOptions();
-  const error = "";
-  const [query, setQuery] = useState(match || "");
   const {queryControls: {autocomplete}} = useAppState();
-  const [queryHistoryIndex, setQueryHistoryIndex] = useState(0);
-  const [queryHistory, setQueryHistory] = useState<string[]>([]);
-
-  const onRunQuery = () => {
-    setQueryHistory(prev => [...prev, query]);
-    setQueryHistoryIndex(prev => prev + 1);
-    cardinalityDispatch({type: "SET_MATCH", payload: query});
-    cardinalityDispatch({type: "RUN_QUERY"});
-  };
-
-  const onSetQuery = (query: string) => {
-    setQuery(query);
-  };
-
-  const onSetHistory = (step: number) => {
-    const newIndexHistory = queryHistoryIndex + step;
-    if (newIndexHistory < 0 || newIndexHistory >= queryHistory.length) return;
-    setQueryHistoryIndex(newIndexHistory);
-    setQuery(queryHistory[newIndexHistory]);
-  };
+  const {queryOptions} = useFetchQueryOptions();
 
   const onChangeAutocomplete = () => {
     dispatch({type: "TOGGLE_AUTOCOMPLETE"});
@@ -79,9 +69,7 @@ const CardinalityConfigurator: FC = () => {
           value={topN}
           error={topN < 1}
           helperText={topN < 1 ? "Number can't be less than zero" : " "}
-          onChange={(e) => {
-            cardinalityDispatch({type: "SET_TOP_N", payload: +e.target.value});
-          }}/>
+          onChange={onTopNChange}/>
       </Box>
     </Box>
   </Box>;

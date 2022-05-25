@@ -1,6 +1,6 @@
 import {Box, Paper, Table, TableBody, TableCell, TableContainer, TablePagination, TableRow,} from "@mui/material";
 import React, {FC, useState} from "preact/compat";
-import {ChangeEvent, MouseEvent} from "react";
+import {ChangeEvent, MouseEvent, SyntheticEvent} from "react";
 import {Data, Order, TableProps,} from "./types";
 import {EnhancedTableHead} from "./TableHead";
 import {getComparator, stableSort} from "./helpers";
@@ -11,7 +11,8 @@ const EnhancedTable: FC<TableProps> = ({
   rows,
   headerCells,
   defaultSortColumn,
-  isPagingEnabled}) => {
+  isPagingEnabled,
+  onRowClick}) => {
 
   const [order, setOrder] = useState<Order>("desc");
   const [orderBy, setOrderBy] = useState<keyof Data>(defaultSortColumn);
@@ -38,7 +39,10 @@ const EnhancedTable: FC<TableProps> = ({
     setSelected([]);
   };
 
-  const handleClick = (event: MouseEvent<unknown>, name: string) => {
+  const handleClick = (event: SyntheticEvent, name: string) => {
+    if (onRowClick) {
+      onRowClick(event, name);
+    }
     const selectedIndex = selected.indexOf(name);
     let newSelected: readonly string[] = [];
 

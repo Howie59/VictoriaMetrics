@@ -1,4 +1,4 @@
-import {Containers, DefaultState, Tabs, TSDBStatus, TypographyFunctions} from "./types";
+import {Containers, DefaultState, QueryUpdater, Tabs, TSDBStatus, TypographyFunctions} from "./types";
 import {Data} from "../Table/types";
 import {useRef} from "preact/compat";
 
@@ -6,6 +6,19 @@ export const typographyValues: TypographyFunctions = {
   labelValueCountByLabelName: (value: number): string => `Top ${value} label names with value count`,
   seriesCountByLabelValuePair: (value: number): string => `Top ${value} series count by label value pairs`,
   seriesCountByMetricName: (value: number): string => `Top ${value} series count by metric names`,
+};
+
+export const queryUpdater: QueryUpdater = {
+  labelValueCountByLabelName: (query: string): string => `{${query}!=""}`,
+  seriesCountByLabelValuePair: (query: string): string => {
+    return `{${query.split("=").map((val, idx) => {
+      if (idx === 1) {
+        return `"${val}"`;
+      }
+      return val;
+    }).join("=")}}`;
+  },
+  seriesCountByMetricName: (query: string): string => query,
 };
 
 export const progressCount = (totalSeries: number, key: string, row: Data): Data => {

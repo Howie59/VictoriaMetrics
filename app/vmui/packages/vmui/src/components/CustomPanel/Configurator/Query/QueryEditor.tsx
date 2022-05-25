@@ -103,6 +103,7 @@ const QueryEditor: FC<QueryEditorProps> = ({
       fullWidth
       label={label}
       multiline
+      focused={!!query}
       error={!!error}
       onFocus={() => setFocusField(true)}
       onBlur={(e) => {

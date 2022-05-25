@@ -16,6 +16,10 @@ export type TypographyFunctions = {
   [key: string]: (value: number) => string,
 }
 
+export type QueryUpdater = {
+  [key: string]: (query: string) => string,
+}
+
 export interface Tabs {
   labelValueCountByLabelName: string[];
   seriesCountByLabelValuePair: string[];

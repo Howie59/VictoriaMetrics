@@ -1,22 +1,53 @@
-import React, {FC, useState} from "preact/compat";
+import React, {ChangeEvent, FC, useState} from "react";
 import {SyntheticEvent} from "react";
-import {Typography, Grid, Alert, Box, Tabs} from "@mui/material";
+import {Typography, Grid, Alert, Box, Tabs, Tab} from "@mui/material";
 import TableChartIcon from "@mui/icons-material/TableChart";
 import ShowChartIcon from "@mui/icons-material/ShowChart";
+import AnnouncementIcon from "@mui/icons-material/Announcement";
 import {useFetchQuery} from "../../hooks/useCardinalityFetch";
 import EnhancedTable from "../Table/Table";
 import {TSDBStatus, TopHeapEntry, DefaultState, Tabs as TabsType, Containers} from "./types";
 import {defaultHeadCells, headCellsWithProgress, spinnerContainerStyles} from "./consts";
-import {defaultProperties, progressCount, typographyValues} from "./helpers";
+import {defaultProperties, progressCount, queryUpdater, typographyValues} from "./helpers";
 import {Data} from "../Table/types";
 import BarChart from "../BarChart/BarChart";
 import CardinalityConfigurator from "./CardinalityConfigurator/CardinalityConfigurator";
 import {barOptions} from "../BarChart/consts";
 import Spinner from "../common/Spinner";
-import Tab from "@mui/material/Tab";
 import TabPanel from "../TabPanel/TabPanel";
+import {useCardinalityDispatch, useCardinalityState} from "../../state/cardinality/CardinalityStateContext";
+import {hexToRGB} from "../../utils/color";
 
 const CardinalityPanel: FC = () => {
+  const cardinalityDispatch = useCardinalityDispatch();
+
+  const {topN, match} = useCardinalityState();
+  const configError = "";
+  const [query, setQuery] = useState(match || "");
+  const [queryHistoryIndex, setQueryHistoryIndex] = useState(0);
+  const [queryHistory, setQueryHistory] = useState<string[]>([]);
+
+  const onRunQuery = () => {
+    setQueryHistory(prev => [...prev, query]);
+    setQueryHistoryIndex(prev => prev + 1);
+    cardinalityDispatch({type: "SET_MATCH", payload: query});
+    cardinalityDispatch({type: "RUN_QUERY"});
+  };
+
+  const onSetQuery = (query: string) => {
+    setQuery(query);
+  };
+
+  const onSetHistory = (step: number) => {
+    const newIndexHistory = queryHistoryIndex + step;
+    if (newIndexHistory < 0 || newIndexHistory >= queryHistory.length) return;
+    setQueryHistoryIndex(newIndexHistory);
+    setQuery(queryHistory[newIndexHistory]);
+  };
+
+  const onTopNChange = (e: ChangeEvent<HTMLTextAreaElement|HTMLInputElement>) => {
+    cardinalityDispatch({type: "SET_TOP_N", payload: +e.target.value});
+  };
 
   const {isLoading, tsdbStatus, error} = useFetchQuery();
   const defaultProps = defaultProperties(tsdbStatus);
@@ -28,10 +59,27 @@ const CardinalityPanel: FC = () => {
     setTab({...stateTabs, [e.target.id]: newValue});
   };
 
+  const handleRowClick = (key: string) => (_: SyntheticEvent, name: string) => {
+    const query = queryUpdater[key](name);
+    setQuery(query);
+    setQueryHistory(prev => [...prev, query]);
+    setQueryHistoryIndex(prev => prev + 1);
+    cardinalityDispatch({type: "SET_MATCH", payload: query});
+    cardinalityDispatch({type: "RUN_QUERY"});
+  };
+
   return (
     <>
       {isLoading && <Spinner isLoading={isLoading} height={"800px"} containerStyles={spinnerContainerStyles("100%")} />}
-      <CardinalityConfigurator/>
+      <CardinalityConfigurator
+        error={configError}
+        query={query}
+        onRunQuery={onRunQuery}
+        onSetQuery={onSetQuery}
+        onSetHistory={onSetHistory}
+        onTopNChange={onTopNChange}
+        topN={topN}
+      />
       {error && <Alert color="error" severity="error" sx={{whiteSpace: "pre-wrap", mt: 2}}>{error}</Alert>}
       {Object.keys(tsdbStatus).map((key ) => {
         if (key == "numSeries") {
@@ -66,10 +114,12 @@ const CardinalityPanel: FC = () => {
                     ref={defaultProps.containerRefs[key as keyof Containers<HTMLDivElement>]}
                     style={{width: "100%", paddingRight: idx !== 0 ? "40px" : 0 }} key={`${key}-${idx}`}>
                     <TabPanel value={stateTabs[key as keyof DefaultState]} index={idx}>
+                      <p className={"legendLabel"}>click on row will filter results <AnnouncementIcon color={"info"}/></p>
                       {stateTabs[key as keyof DefaultState] === 0 ? <EnhancedTable
                         rows={rows}
                         headerCells={key == "seriesCountByMetricName" ? headCellsWithProgress : defaultHeadCells}
                         defaultSortColumn={"value"}
+                        onRowClick={handleRowClick(key)}
                       />: <BarChart
                         data={[
                           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
