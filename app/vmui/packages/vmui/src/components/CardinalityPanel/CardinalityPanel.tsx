@@ -1,6 +1,8 @@
 import React, {FC, useState} from "preact/compat";
 import {SyntheticEvent} from "react";
 import {Typography, Grid, Alert, Box, Tabs} from "@mui/material";
+import TableChartIcon from "@mui/icons-material/TableChart";
+import ShowChartIcon from "@mui/icons-material/ShowChart";
 import {useFetchQuery} from "../../hooks/useCardinalityFetch";
 import EnhancedTable from "../Table/Table";
 import {TSDBStatus, TopHeapEntry, DefaultState, Tabs as TabsType, Containers} from "./types";
@@ -49,7 +51,13 @@ const CardinalityPanel: FC = () => {
                 <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
                   <Tabs value={stateTabs[key as keyof DefaultState]} onChange={handleTabChange} aria-label="basic tabs example">
                     {defaultProps.tabs[key as keyof TabsType].map((title: string, i: number) =>
-                      <Tab key={title} label={title} aria-controls={`tabpanel-${i}`} id={key} />
+                      <Tab
+                        key={title}
+                        label={title}
+                        aria-controls={`tabpanel-${i}`}
+                        id={key}
+                        iconPosition={"start"}
+                        icon={ i === 0 ? <TableChartIcon /> : <ShowChartIcon /> } />
                     )}
                   </Tabs>
                 </Box>
