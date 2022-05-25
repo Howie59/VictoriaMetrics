@@ -16,7 +16,6 @@ import {barOptions} from "../BarChart/consts";
 import Spinner from "../common/Spinner";
 import TabPanel from "../TabPanel/TabPanel";
 import {useCardinalityDispatch, useCardinalityState} from "../../state/cardinality/CardinalityStateContext";
-import {hexToRGB} from "../../utils/color";
 
 const CardinalityPanel: FC = () => {
   const cardinalityDispatch = useCardinalityDispatch();
