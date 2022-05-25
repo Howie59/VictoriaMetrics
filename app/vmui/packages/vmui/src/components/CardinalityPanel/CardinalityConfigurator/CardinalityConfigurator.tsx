@@ -52,8 +52,11 @@ const CardinalityConfigurator: FC = () => {
   return <Box boxShadow="rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;" p={4} pb={2} mb={2}>
     <Box>
       <Box display="grid" gridTemplateColumns="1fr auto auto" gap="4px" width="100%" mb={0}>
-        <QueryEditor query={query} index={0} autocomplete={autocomplete} queryOptions={queryOptions}
-          error={error} setHistoryIndex={onSetHistory} runQuery={onRunQuery} setQuery={onSetQuery}/>
+        <QueryEditor
+          query={query} index={0} autocomplete={autocomplete} queryOptions={queryOptions}
+          error={error} setHistoryIndex={onSetHistory} runQuery={onRunQuery} setQuery={onSetQuery}
+          label={"Arbitrary time series selector"}
+        />
         <Tooltip title="Execute Query">
           <IconButton onClick={onRunQuery} sx={{height: "49px", width: "49px"}}>
             <PlayCircleOutlineIcon/>
