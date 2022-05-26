@@ -1035,6 +1035,14 @@ func (s *Storage) mustSaveCache(c *workingsetcache.Cache, info, name string) {
 // saveCacheLock prevents from data races when multiple concurrent goroutines save the same cache.
 var saveCacheLock sync.Mutex
 
+// SetRetentionTimezoneOffset sets the offset, which is used for calculating the time for indexdb rotation.
+// See https://github.com/VictoriaMetrics/VictoriaMetrics/pull/2574
+func SetRetentionTimezoneOffset(offset time.Duration) {
+	retentionTimezoneOffsetMsecs = offset.Milliseconds()
+}
+
+var retentionTimezoneOffsetMsecs int64
+
 func nextRetentionDuration(retentionMsecs int64) time.Duration {
 	// Round retentionMsecs to days. This guarantees that per-day inverted index works as expected.
 	retentionMsecs = ((retentionMsecs + msecPerDay - 1) / msecPerDay) * msecPerDay
@@ -1044,6 +1052,9 @@ func nextRetentionDuration(retentionMsecs int64) time.Duration {
 	// This should prevent from possible double deletion of indexdb
 	// due to time drift - see https://github.com/VictoriaMetrics/VictoriaMetrics/issues/248 .
 	deadline += 4 * 3600 * 1000
+	// The effect of time zone on retention period is moved out.
+	// See https://github.com/VictoriaMetrics/VictoriaMetrics/pull/2574
+	deadline -= retentionTimezoneOffsetMsecs
 	return time.Duration(deadline-t) * time.Millisecond
 }
 
