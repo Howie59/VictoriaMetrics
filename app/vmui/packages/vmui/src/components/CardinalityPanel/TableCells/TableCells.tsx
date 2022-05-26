@@ -4,11 +4,14 @@ import {BorderLinearProgressWithLabel} from "../../BorderLineProgress/BorderLine
 import React from "preact/compat";
 import IconButton from "@mui/material/IconButton";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
-import SendIcon from "@mui/icons-material/Send";
+import ShowChartIcon from "@mui/icons-material/ShowChart";
 import Tooltip from "@mui/material/Tooltip";
 import {SyntheticEvent} from "react";
 
-export const tableCells = (row: Data, onIconClick: (_: SyntheticEvent, name: string) => void) => {
+export const tableCells = (
+  row: Data,
+  onFilterClick: (e: SyntheticEvent) => void,
+  onGraphClick: (e: SyntheticEvent) => void) => {
   return Object.keys(row).map((key, idx) => {
     if (idx === 0) {
       return (<TableCell component="th" scope="row" key={key}>
@@ -32,18 +35,20 @@ export const tableCells = (row: Data, onIconClick: (_: SyntheticEvent, name: str
         <ButtonGroup variant="contained">
           <Tooltip title={title}>
             <IconButton
-              onClick={(e) => onIconClick(e, row.name)}
+              id={row.name}
+              onClick={onFilterClick}
               sx={{height: "49px", width: "49px"}}>
               <PlayCircleOutlineIcon/>
             </IconButton>
           </Tooltip>
-          <Tooltip title={vmuiTitle}>
+          {row[key]==="1" ? <Tooltip title={vmuiTitle}>
             <IconButton
-              onClick={(e) => onIconClick(e, row.name)}
+              id={row.name}
+              onClick={onGraphClick}
               sx={{height: "49px", width: "49px"}}>
-              <SendIcon />
+              <ShowChartIcon />
             </IconButton>
-          </Tooltip>
+          </Tooltip>: null}
         </ButtonGroup>
       </TableCell>);
     }

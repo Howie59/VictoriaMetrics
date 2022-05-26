@@ -15,6 +15,7 @@ import Tab from "@mui/material/Tab";
 import router, {RouterOptions, routerOptions} from "../../router/index";
 import DatePicker from "../Main/DatePicker/DatePicker";
 import {useCardinalityState, useCardinalityDispatch} from "../../state/cardinality/CardinalityStateContext";
+import {useEffect} from "react";
 
 const classes = {
   logo: {
@@ -77,6 +78,10 @@ const Header: FC = () => {
   const navigateHandler = (pathname: string) => {
     navigate({pathname, search: search});
   };
+
+  useEffect(() => {
+    setActiveMenu(pathname);
+  }, [pathname]);
 
   return <AppBar position="static" sx={{px: 1, boxShadow: "none"}}>
     <Toolbar>
