@@ -4,7 +4,6 @@ import {ChangeEvent, MouseEvent, SyntheticEvent} from "react";
 import {Data, Order, TableProps,} from "./types";
 import {EnhancedTableHead} from "./TableHead";
 import {getComparator, stableSort} from "./helpers";
-import {BorderLinearProgressWithLabel} from "../BorderLineProgress/BorderLinearProgress";
 
 
 const EnhancedTable: FC<TableProps> = ({
@@ -12,13 +11,12 @@ const EnhancedTable: FC<TableProps> = ({
   headerCells,
   defaultSortColumn,
   isPagingEnabled,
-  onRowClick}) => {
+  tableCells}) => {
 
   const [order, setOrder] = useState<Order>("desc");
   const [orderBy, setOrderBy] = useState<keyof Data>(defaultSortColumn);
   const [selected, setSelected] = useState<readonly string[]>([]);
   const [page, setPage] = useState(0);
-  const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const handleRequestSort = (
@@ -40,9 +38,6 @@ const EnhancedTable: FC<TableProps> = ({
   };
 
   const handleClick = (event: SyntheticEvent, name: string) => {
-    if (onRowClick) {
-      onRowClick(event, name);
-    }
     const selectedIndex = selected.indexOf(name);
     let newSelected: readonly string[] = [];
 
@@ -71,10 +66,6 @@ const EnhancedTable: FC<TableProps> = ({
     setPage(0);
   };
 
-  const handleChangeDense = (event: ChangeEvent<HTMLInputElement>) => {
-    setDense(event.target.checked);
-  };
-
   const isSelected = (name: string) => selected.indexOf(name) !== -1;
 
   // Avoid a layout jump when reaching the last page with empty rows.
@@ -90,7 +81,6 @@ const EnhancedTable: FC<TableProps> = ({
           <Table
             sx={{minWidth: 750}}
             aria-labelledby="tableTitle"
-            size={dense ? "small" : "medium"}
           >
             <EnhancedTableHead
               numSelected={selected.length}
@@ -104,9 +94,8 @@ const EnhancedTable: FC<TableProps> = ({
               {/* if you don't need to support IE11, you can replace the `stableSort` call with:
               rows.slice().sort(getComparator(order, orderBy)) */}
               {sortedData
-                .map((row, index) => {
+                .map((row) => {
                   const isItemSelected = isSelected(row.name);
-                  const labelId = `enhanced-table-checkbox-${index}`;
 
                   return (
                     <TableRow
@@ -118,31 +107,12 @@ const EnhancedTable: FC<TableProps> = ({
                       key={row.name}
                       selected={isItemSelected}
                     >
-                      {Object.keys(row).map((key, idx) => {
-                        if (idx === 0) {
-                          return (<TableCell component="th" id={labelId} scope="row" key={key}>
-                            {row[key as keyof Data]}
-                          </TableCell>);
-                        }
-                        if (key === "progressValue") {
-                          return (
-                            <TableCell key={key}>
-                              <BorderLinearProgressWithLabel
-                                variant="determinate"
-                                value={row[key as keyof Data] as number}
-                              />
-                            </TableCell>
-                          );
-                        }
-                        return (<TableCell key={key}>{row[key as keyof Data]}</TableCell>);
-                      })}
+                      {tableCells(row)}
                     </TableRow>
                   );
                 })}
               {emptyRows > 0 && (
-                <TableRow
-                  style={{height: (dense ? 33 : 53) * emptyRows}}
-                >
+                <TableRow>
                   <TableCell colSpan={6}/>
                 </TableRow>
               )}

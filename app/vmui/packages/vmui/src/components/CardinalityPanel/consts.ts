@@ -1,4 +1,4 @@
-export const defaultHeadCells = [
+export const headCellsWithProgress = [
   {
     disablePadding: false,
     id: "name",
@@ -11,14 +11,21 @@ export const defaultHeadCells = [
     label: "Value",
     numeric: false,
   },
+  {
+    disablePadding: false,
+    id: "percentage",
+    label: "Percentage",
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    id: "action",
+    label: "Action",
+    numeric: false,
+  }
 ];
 
-export const headCellsWithProgress = [...defaultHeadCells, {
-  disablePadding: false,
-  id: "percentage",
-  label: "Percentage",
-  numeric: false,
-}];
+export const defaultHeadCells = headCellsWithProgress.filter((head) => head.id!=="percentage");
 
 export const labels = {
   numSeries: "Number of Series",

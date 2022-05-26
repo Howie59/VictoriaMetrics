@@ -3,7 +3,6 @@ import {SyntheticEvent} from "react";
 import {Typography, Grid, Alert, Box, Tabs, Tab} from "@mui/material";
 import TableChartIcon from "@mui/icons-material/TableChart";
 import ShowChartIcon from "@mui/icons-material/ShowChart";
-import AnnouncementIcon from "@mui/icons-material/Announcement";
 import {useFetchQuery} from "../../hooks/useCardinalityFetch";
 import EnhancedTable from "../Table/Table";
 import {TSDBStatus, TopHeapEntry, DefaultState, Tabs as TabsType, Containers} from "./types";
@@ -16,6 +15,7 @@ import {barOptions} from "../BarChart/consts";
 import Spinner from "../common/Spinner";
 import TabPanel from "../TabPanel/TabPanel";
 import {useCardinalityDispatch, useCardinalityState} from "../../state/cardinality/CardinalityStateContext";
+import {tableCells} from "./TableCells/TableCells";
 
 const CardinalityPanel: FC = () => {
   const cardinalityDispatch = useCardinalityDispatch();
@@ -58,7 +58,7 @@ const CardinalityPanel: FC = () => {
     setTab({...stateTabs, [e.target.id]: newValue});
   };
 
-  const handleRowClick = (key: string) => (_: SyntheticEvent, name: string) => {
+  const handleFilterClick = (key: string) => (_: SyntheticEvent, name: string) => {
     const query = queryUpdater[key](name);
     setQuery(query);
     setQueryHistory(prev => [...prev, query]);
@@ -87,7 +87,11 @@ const CardinalityPanel: FC = () => {
         const typographyFn = typographyValues[key];
         const numberOfValues = tsdbStatus[key as keyof TSDBStatus] as TopHeapEntry[];
         const rows = tsdbStatus[key as keyof TSDBStatus] as unknown as Data[];
-        rows.forEach((row) => progressCount(tsdbStatus.numSeries, key, row));
+        rows.forEach((row) => {
+          progressCount(tsdbStatus.numSeries, key, row);
+          row.actions="1";
+        });
+        const headerCells = key == "seriesCountByMetricName" ? headCellsWithProgress: defaultHeadCells;
         return (
           <>
             <Grid container spacing={2} sx={{px: 2}}>
@@ -96,7 +100,9 @@ const CardinalityPanel: FC = () => {
                   {typographyFn(numberOfValues.length)}
                 </Typography>
                 <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                  <Tabs value={stateTabs[key as keyof DefaultState]} onChange={handleTabChange} aria-label="basic tabs example">
+                  <Tabs
+                    value={stateTabs[key as keyof DefaultState]}
+                    onChange={handleTabChange} aria-label="basic tabs example">
                     {defaultProps.tabs[key as keyof TabsType].map((title: string, i: number) =>
                       <Tab
                         key={title}
@@ -113,12 +119,11 @@ const CardinalityPanel: FC = () => {
                     ref={defaultProps.containerRefs[key as keyof Containers<HTMLDivElement>]}
                     style={{width: "100%", paddingRight: idx !== 0 ? "40px" : 0 }} key={`${key}-${idx}`}>
                     <TabPanel value={stateTabs[key as keyof DefaultState]} index={idx}>
-                      <p className={"legendLabel"}>click on row will filter results <AnnouncementIcon color={"info"}/></p>
                       {stateTabs[key as keyof DefaultState] === 0 ? <EnhancedTable
                         rows={rows}
-                        headerCells={key == "seriesCountByMetricName" ? headCellsWithProgress : defaultHeadCells}
+                        headerCells={headerCells}
                         defaultSortColumn={"value"}
-                        onRowClick={handleRowClick(key)}
+                        tableCells={(row) => tableCells(row, handleFilterClick(key))}
                       />: <BarChart
                         data={[
                           // eslint-disable-next-line @typescript-eslint/ban-ts-comment

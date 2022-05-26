@@ -1,4 +1,5 @@
-import {ChangeEvent, MouseEvent, SyntheticEvent} from "react";
+import {ChangeEvent, MouseEvent, ReactNode, SyntheticEvent} from "react";
+import {TableCell} from "@mui/material";
 
 export type Order = "asc" | "desc";
 
@@ -23,8 +24,8 @@ export interface TableProps {
   rows: Data[];
   headerCells: HeadCell[],
   defaultSortColumn: keyof Data,
+  tableCells: (row: Data) => ReactNode[],
   isPagingEnabled?: boolean,
-  onRowClick?: (event: SyntheticEvent, name: string) => void,
 }
 
 
@@ -32,37 +33,5 @@ export interface Data {
   name: string;
   value: number;
   progressValue: number;
+  actions: string;
 }
-
-export const headCells: readonly HeadCell[] = [
-  {
-    id: "name",
-    numeric: false,
-    disablePadding: true,
-    label: "Dessert (100g serving)",
-  },
-  {
-    id: "calories",
-    numeric: true,
-    disablePadding: false,
-    label: "Calories",
-  },
-  {
-    id: "fat",
-    numeric: true,
-    disablePadding: false,
-    label: "Fat (g)",
-  },
-  {
-    id: "carbs",
-    numeric: true,
-    disablePadding: false,
-    label: "Carbs (g)",
-  },
-  {
-    id: "protein",
-    numeric: true,
-    disablePadding: false,
-    label: "Protein (g)",
-  },
-];
