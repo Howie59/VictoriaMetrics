@@ -7,11 +7,15 @@ import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import ShowChartIcon from "@mui/icons-material/ShowChart";
 import Tooltip from "@mui/material/Tooltip";
 import {SyntheticEvent} from "react";
+import {formatDateToUTC} from "../../../utils/time";
+import dayjs from "dayjs";
 
 export const tableCells = (
   row: Data,
-  onFilterClick: (e: SyntheticEvent) => void,
-  onGraphClick: (e: SyntheticEvent) => void) => {
+  date: string | null,
+  onFilterClick: (e: SyntheticEvent) => void) => {
+  const pathname = window.location.pathname;
+  const withday = dayjs(date).add(1, "day").toDate();
   return Object.keys(row).map((key, idx) => {
     if (idx === 0) {
       return (<TableCell component="th" scope="row" key={key}>
@@ -42,12 +46,16 @@ export const tableCells = (
             </IconButton>
           </Tooltip>
           {row[key]==="1" ? <Tooltip title={vmuiTitle}>
-            <IconButton
-              id={row.name}
-              onClick={onGraphClick}
-              sx={{height: "49px", width: "49px"}}>
-              <ShowChartIcon />
-            </IconButton>
+            <a
+              href={`${pathname}?g0.range_input=24h&g0.end_input=${formatDateToUTC(withday)}&g0.expr=count(${row.name})#/`}
+              target="_blank"
+              rel="noreferrer">
+              <IconButton
+                id={row.name}
+                sx={{height: "49px", width: "49px"}}>
+                <ShowChartIcon />
+              </IconButton>
+            </a>
           </Tooltip>: null}
         </ButtonGroup>
       </TableCell>);

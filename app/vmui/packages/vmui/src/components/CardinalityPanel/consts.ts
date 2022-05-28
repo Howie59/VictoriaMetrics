@@ -1,3 +1,5 @@
+import {HeadCell} from "../Table/types";
+
 export const headCellsWithProgress = [
   {
     disablePadding: false,
@@ -23,7 +25,7 @@ export const headCellsWithProgress = [
     label: "Action",
     numeric: false,
   }
-];
+] as HeadCell[];
 
 export const defaultHeadCells = headCellsWithProgress.filter((head) => head.id!=="percentage");
 
@@ -44,3 +46,6 @@ export const spinnerContainerStyles = (height: string) =>  {
     zIndex: 1000,
   };
 };
+
+export const PERCENTAGE_TITLE = `It shows percentage of the total number of metrics. 
+Approximately you can estimated amount of memory usage`;

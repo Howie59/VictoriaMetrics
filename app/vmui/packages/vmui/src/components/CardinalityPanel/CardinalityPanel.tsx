@@ -1,13 +1,12 @@
 import React, {ChangeEvent, FC, useState} from "react";
 import {SyntheticEvent} from "react";
-import {useNavigate} from "react-router-dom";
-import {Typography, Grid, Alert, Box, Tabs, Tab} from "@mui/material";
+import {Typography, Grid, Alert, Box, Tabs, Tab, Tooltip} from "@mui/material";
 import TableChartIcon from "@mui/icons-material/TableChart";
 import ShowChartIcon from "@mui/icons-material/ShowChart";
 import {useFetchQuery} from "../../hooks/useCardinalityFetch";
 import EnhancedTable from "../Table/Table";
 import {TSDBStatus, TopHeapEntry, DefaultState, Tabs as TabsType, Containers} from "./types";
-import {defaultHeadCells, headCellsWithProgress, spinnerContainerStyles} from "./consts";
+import {defaultHeadCells, headCellsWithProgress, PERCENTAGE_TITLE, spinnerContainerStyles} from "./consts";
 import {defaultProperties, progressCount, queryUpdater, typographyValues} from "./helpers";
 import {Data} from "../Table/types";
 import BarChart from "../BarChart/BarChart";
@@ -17,19 +16,15 @@ import Spinner from "../common/Spinner";
 import TabPanel from "../TabPanel/TabPanel";
 import {useCardinalityDispatch, useCardinalityState} from "../../state/cardinality/CardinalityStateContext";
 import {tableCells} from "./TableCells/TableCells";
-import router from "../../router";
-import {useAppDispatch} from "../../state/common/StateContext";
 
 const CardinalityPanel: FC = () => {
   const cardinalityDispatch = useCardinalityDispatch();
 
-  const {topN, match} = useCardinalityState();
+  const {topN, match, date} = useCardinalityState();
   const configError = "";
   const [query, setQuery] = useState(match || "");
   const [queryHistoryIndex, setQueryHistoryIndex] = useState(0);
   const [queryHistory, setQueryHistory] = useState<string[]>([]);
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
 
   const onRunQuery = () => {
     setQueryHistory(prev => [...prev, query]);
@@ -73,30 +68,14 @@ const CardinalityPanel: FC = () => {
     cardinalityDispatch({type: "RUN_QUERY"});
   };
 
-  const handleGraphClick = (e: SyntheticEvent) => {
-    const name = e.currentTarget.id;
-    dispatch({type: "SET_QUERY", payload: [name]});
-    dispatch({type: "RUN_QUERY"});
-    navigate({ pathname: router.home });
-  };
-
   return (
     <>
       {isLoading && <Spinner isLoading={isLoading} height={"800px"} containerStyles={spinnerContainerStyles("100%")} />}
-      <CardinalityConfigurator
-        error={configError}
-        query={query}
-        onRunQuery={onRunQuery}
-        onSetQuery={onSetQuery}
-        onSetHistory={onSetHistory}
-        onTopNChange={onTopNChange}
-        topN={topN}
-      />
+      <CardinalityConfigurator error={configError} query={query} onRunQuery={onRunQuery} onSetQuery={onSetQuery}
+        onSetHistory={onSetHistory} onTopNChange={onTopNChange} topN={topN} />
       {error && <Alert color="error" severity="error" sx={{whiteSpace: "pre-wrap", mt: 2}}>{error}</Alert>}
       {Object.keys(tsdbStatus).map((key ) => {
-        if (key == "numSeries") {
-          return null;
-        }
+        if (key == "numSeries") return null;
         const typographyFn = typographyValues[key];
         const numberOfValues = tsdbStatus[key as keyof TSDBStatus] as TopHeapEntry[];
         const rows = tsdbStatus[key as keyof TSDBStatus] as unknown as Data[];
@@ -104,7 +83,17 @@ const CardinalityPanel: FC = () => {
           progressCount(tsdbStatus.numSeries, key, row);
           row.actions = key === "seriesCountByMetricName" ? "1" : "0";
         });
-        const headerCells = key == "seriesCountByMetricName" ? headCellsWithProgress: defaultHeadCells;
+        const cells = headCellsWithProgress.map((cell) => {
+          if (cell.id === "percentage") {
+            const label = cell.label;
+            cell.label = (<Tooltip placement={"top"} title={PERCENTAGE_TITLE}>
+              <span>{label}</span>
+            </Tooltip>);
+            return cell;
+          }
+          return cell;
+        });
+        const headerCells = key == "seriesCountByMetricName" ? cells : defaultHeadCells;
         return (
           <>
             <Grid container spacing={2} sx={{px: 2}}>
@@ -136,7 +125,7 @@ const CardinalityPanel: FC = () => {
                         rows={rows}
                         headerCells={headerCells}
                         defaultSortColumn={"value"}
-                        tableCells={(row) => tableCells(row,handleFilterClick(key), handleGraphClick)}
+                        tableCells={(row) => tableCells(row,date,handleFilterClick(key))}
                       />: <BarChart
                         data={[
                           // eslint-disable-next-line @typescript-eslint/ban-ts-comment

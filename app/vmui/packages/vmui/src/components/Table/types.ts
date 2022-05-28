@@ -1,12 +1,11 @@
-import {ChangeEvent, MouseEvent, ReactNode, SyntheticEvent} from "react";
-import {TableCell} from "@mui/material";
+import {ChangeEvent, MouseEvent, ReactNode} from "react";
 
 export type Order = "asc" | "desc";
 
 export interface HeadCell {
   disablePadding: boolean;
   id: string;
-  label: string;
+  label: string | ReactNode;
   numeric: boolean;
 }
 
