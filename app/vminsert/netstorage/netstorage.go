@@ -119,6 +119,7 @@ again:
 	return nil
 }
 
+// 不需要睡眠，直接处理
 var closedCh = func() <-chan struct{} {
 	ch := make(chan struct{})
 	close(ch)
@@ -170,7 +171,8 @@ func (sn *storageNode) run(stopCh <-chan struct{}, snIdx int) {
 		sn.brLock.Unlock()
 		currentTime := fasttime.UnixTimestamp()
 		if len(br.buf) < cap(br.buf)/4 && currentTime-brLastResetTime > 10 {
-			// Free up capacity space occupied by br.buf in order to reduce memory usage after spikes.
+			// 对于数据量较小的情况，本次不进行传输，保存到下一次数据传递
+			// 将buf的cap缩容到0，避免占用大内存
 			br.buf = append(br.buf[:0:0], br.buf...)
 			brLastResetTime = currentTime
 		}
@@ -314,6 +316,7 @@ func (sn *storageNode) sendBufRowsNonblocking(br *bufRows) bool {
 
 var cannotSendBufsLogger = logger.WithThrottler("cannotSendBufRows", 5*time.Second)
 
+// 发送nil到vmstorage(探测网络连接)
 func sendToConn(bc *handshake.BufferedConn, buf []byte) error {
 	if len(buf) == 0 {
 		// Nothing to send
@@ -333,6 +336,8 @@ func sendToConn(bc *handshake.BufferedConn, buf []byte) error {
 	// sizeBuf is used for read optimization in vmstorage.
 	sizeBuf := sizeBufPool.Get()
 	defer sizeBufPool.Put(sizeBuf)
+	// 位运算，将buf转换为[]byte格式
+	// todo：没想懂为啥要这样搞？
 	sizeBuf.B = encoding.MarshalUint64(sizeBuf.B[:0], uint64(len(buf)))
 	if _, err := bc.Write(sizeBuf.B); err != nil {
 		return fmt.Errorf("cannot write data size %d: %w", len(buf), err)
@@ -380,6 +385,7 @@ func (sn *storageNode) dial() (*handshake.BufferedConn, error) {
 	if *disableRPCCompression {
 		compressionLevel = 0
 	}
+	// 应用层握手
 	bc, err := handshake.VMInsertClient(c, compressionLevel)
 	if err != nil {
 		_ = c.Close()

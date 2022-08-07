@@ -98,6 +98,7 @@ func main() {
 		promql.InitRollupResultCache("")
 	}
 	concurrencyCh = make(chan struct{}, *maxConcurrentRequests)
+	// todo：反向代理？
 	initVMAlertProxy()
 	var vmselectapiServer *vmselectapi.Server
 	if *clusternativeListenAddr != "" {
@@ -124,6 +125,7 @@ func main() {
 	}
 	logger.Infof("successfully shut down http service in %.3f seconds", time.Since(startTime).Seconds())
 
+	// 优雅退出
 	if vmselectapiServer != nil {
 		logger.Infof("stopping vmselectapi server...")
 		vmselectapiServer.MustStop()
@@ -191,6 +193,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) bool {
 			timerpool.Put(t)
 			defer func() { <-concurrencyCh }()
 		case <-t.C:
+			// 睡眠30s
 			timerpool.Put(t)
 			concurrencyLimitTimeout.Inc()
 			err := &httpserver.ErrorWithStatusCode{

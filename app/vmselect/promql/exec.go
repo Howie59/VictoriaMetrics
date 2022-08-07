@@ -227,10 +227,13 @@ func getReverseCmpOp(op string) string {
 }
 
 func parsePromQLWithCache(q string) (metricsql.Expr, error) {
+	// 先从缓存中读取
 	pcv := parseCacheV.Get(q)
 	if pcv == nil {
+		// 解析器
 		e, err := metricsql.Parse(q)
 		if err == nil {
+			// 优化器(索引下推，无关列去除)
 			e = metricsql.Optimize(e)
 			e = adjustCmpOps(e)
 			if *treatDotsAsIsInRegexps {
@@ -349,8 +352,8 @@ func (pc *parseCache) Get(q string) *parseCacheValue {
 func (pc *parseCache) Put(q string, pcv *parseCacheValue) {
 	pc.mu.Lock()
 	overflow := len(pc.m) - parseCacheMaxLen
+	// 如果超长了，则清除10%的数据
 	if overflow > 0 {
-		// Remove 10% of items from the cache.
 		overflow = int(float64(len(pc.m)) * 0.1)
 		for k := range pc.m {
 			delete(pc.m, k)

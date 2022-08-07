@@ -1368,6 +1368,7 @@ type storageNodesRequest struct {
 
 func startStorageNodesRequest(qt *querytracer.Tracer, denyPartialResponse bool, f func(qt *querytracer.Tracer, idx int, sn *storageNode) interface{}) *storageNodesRequest {
 	resultsCh := make(chan interface{}, len(storageNodes))
+	// 直接根据列表中进行查询
 	for idx, sn := range storageNodes {
 		qtChild := qt.NewChild("rpc at vmstorage %s", sn.connPool.Addr())
 		go func(idx int, sn *storageNode) {

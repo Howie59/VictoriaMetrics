@@ -718,6 +718,7 @@ func QueryHandler(qt *querytracer.Tracer, startTime time.Time, at *auth.Token, w
 	if err != nil {
 		return err
 	}
+	// 回溯时间
 	lookbackDelta, err := getMaxLookback(r)
 	if err != nil {
 		return err

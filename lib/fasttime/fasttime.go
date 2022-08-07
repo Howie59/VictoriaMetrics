@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// 每秒缓存一次时间，保证并发操作不会多次获取时间戳
 func init() {
 	go func() {
 		ticker := time.NewTicker(time.Second)

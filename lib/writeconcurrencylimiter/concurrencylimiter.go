@@ -40,8 +40,7 @@ func Do(f func() error) error {
 	default:
 	}
 
-	// All the workers are busy.
-	// Sleep for up to *maxQueueDuration.
+	// 如果所有worker都很繁忙，睡眠xx时间
 	concurrencyLimitReached.Inc()
 	t := timerpool.Get(*maxQueueDuration)
 	select {
