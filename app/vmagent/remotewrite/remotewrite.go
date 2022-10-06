@@ -429,6 +429,7 @@ type remoteWriteCtx struct {
 	rowsDroppedByRelabel   *metrics.Counter
 }
 
+// 每个url会生成queue
 func newRemoteWriteCtx(argIdx int, at *auth.Token, remoteWriteURL *url.URL, maxInmemoryBlocks int, sanitizedURL string) *remoteWriteCtx {
 	// strip query params, otherwise changing params resets pq
 	pqURL := *remoteWriteURL

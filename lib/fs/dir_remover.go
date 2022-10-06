@@ -10,10 +10,7 @@ import (
 	"github.com/VictoriaMetrics/metrics"
 )
 
-// MustRemoveAll removes path with all the contents.
-//
-// It properly fsyncs the parent directory after path removal.
-//
+// MustRemoveAll 将它内部所有内容都移除掉. 在路径内容移除后，它调用父级目录的fsyncs指令.
 // It properly handles NFS issue https://github.com/VictoriaMetrics/VictoriaMetrics/issues/61 .
 func MustRemoveAll(path string) {
 	if tryRemoveAll(path) {
@@ -52,9 +49,8 @@ func tryRemoveAll(path string) bool {
 	if !isTemporaryNFSError(err) {
 		logger.Panicf("FATAL: cannot remove %q: %s", path, err)
 	}
-	// NFS prevents from removing directories with open files.
-	// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/61 .
-	// Schedule for later directory removal.
+	// NFS 通过打开文件避免了移除文件夹。后面再考虑清除
+	// 参考这个https://github.com/VictoriaMetrics/VictoriaMetrics/issues/61 .
 	nfsDirRemoveFailedAttempts.Inc()
 	return false
 }

@@ -18,16 +18,14 @@ import (
 	"github.com/VictoriaMetrics/metrics"
 )
 
-// MaxBlockSize is the maximum size of the block persistent queue can work with.
+// MaxBlockSize 是持久化队列能够生效的最大块大小.
 const MaxBlockSize = 32 * 1024 * 1024
 
 const defaultChunkFileSize = (MaxBlockSize + 8) * 16
 
 var chunkFileNameRegex = regexp.MustCompile("^[0-9A-F]{16}$")
 
-// queue represents persistent queue.
-//
-// It is unsafe to call queue methods from concurrent goroutines.
+// queue 代表持久化队列. 可以并发调用.
 type queue struct {
 	chunkFileSize   uint64
 	maxBlockSize    uint64
@@ -66,11 +64,11 @@ type queue struct {
 // This is needed in order to remove chunk file associated with empty q.
 func (q *queue) ResetIfEmpty() {
 	if q.readerOffset != q.writerOffset {
-		// The queue isn't empty.
+		// 队列不为空.
 		return
 	}
 	if q.readerOffset < 16*1024*1024 {
-		// The file is too small to drop. Leave it as is in order to reduce filesystem load.
+		// 文件太小了. 按顺序保留它以减少文件系统负载.
 		return
 	}
 	q.mustResetFiles()
@@ -119,10 +117,9 @@ func (q *queue) GetPendingBytes() uint64 {
 	return n
 }
 
-// mustOpen opens persistent queue from the given path.
-//
-// If maxPendingBytes is greater than 0, then the max queue size is limited by this value.
-// The oldest data is deleted when queue size exceeds maxPendingBytes.
+// mustOpen 基于给定路径打开持久化队列
+// 如果maxPendingBytes大于零，则会按照这个约束最大队列大小.
+// maxPendingBytes 如果队列大小超过了这个值则最老的数据会被删除.
 func mustOpen(path, name string, maxPendingBytes int) *queue {
 	if maxPendingBytes < 0 {
 		maxPendingBytes = 0
@@ -139,6 +136,7 @@ func mustOpenInternal(path, name string, chunkFileSize, maxBlockSize, maxPending
 	}
 	q, err := tryOpeningQueue(path, name, chunkFileSize, maxBlockSize, maxPendingBytes)
 	if err != nil {
+		// 如果打开失败，则移除对应路径的文件夹并尝试打开队列
 		logger.Errorf("cannot open persistent queue at %q: %s; cleaning it up and trying again", path, err)
 		fs.RemoveDirContents(path)
 		q, err = tryOpeningQueue(path, name, chunkFileSize, maxBlockSize, maxPendingBytes)

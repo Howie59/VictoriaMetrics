@@ -10,37 +10,36 @@ import (
 	"github.com/VictoriaMetrics/metrics"
 )
 
-// FastQueue is fast persistent queue, which prefers sending data via memory.
-//
-// It falls back to sending data via file when readers don't catch up with writers.
+// FastQueue 是持久化队列，倾向于使用内存发送数据.
+// 如果读者跟不上写入速度，它会降级到文件写入.
 type FastQueue struct {
-	// my protects the state of FastQueue.
+	// 锁
 	mu sync.Mutex
 
-	// cond is used for notifying blocked readers when new data has been added
-	// or when MustClose is called.
+	// 新数据被添加或者 MustClose 被调用的时候cond用于通知阻塞的读者.
 	cond sync.Cond
 
-	// pq is file-based queue
+	// pq 是磁盘队列
 	pq *queue
 
-	// ch is in-memory queue
+	// ch 是内存队列
 	ch chan *bytesutil.ByteBuffer
 
+	// pendingInmemoryBytes 内存中阻塞的字节大小
 	pendingInmemoryBytes uint64
 
+	// lastInmemoryBlockReadTime 上一次内存块的读写时间
 	lastInmemoryBlockReadTime uint64
 
+	// stopDeadline 当前时间加5s为过期时间
 	stopDeadline uint64
 }
 
-// MustOpenFastQueue opens persistent queue at the given path.
+// MustOpenFastQueue 按照指定路径打开持久化队列.
+// 它在内存维护 maxInmemoryBlocks 大小的数据，超过就会落盘.
 //
-// It holds up to maxInmemoryBlocks in memory before falling back to file-based persistence.
-//
-// if maxPendingBytes is 0, then the queue size is unlimited.
-// Otherwise its size is limited by maxPendingBytes. The oldest data is dropped when the queue
-// reaches maxPendingSize.
+// 如果 maxPendingBytes 为0，队列长度无限大. 否则受制于该大小.
+// 当队列长度达到这个，最老的数据就会被丢弃.
 func MustOpenFastQueue(path, name string, maxInmemoryBlocks, maxPendingBytes int) *FastQueue {
 	pq := mustOpen(path, name, maxPendingBytes)
 	fq := &FastQueue{
@@ -60,7 +59,7 @@ func MustOpenFastQueue(path, name string, maxInmemoryBlocks, maxPendingBytes int
 	return fq
 }
 
-// UnblockAllReaders unblocks all the readers.
+// UnblockAllReaders 为所有读取者unblocks.
 func (fq *FastQueue) UnblockAllReaders() {
 	fq.mu.Lock()
 	defer fq.mu.Unlock()
@@ -72,16 +71,15 @@ func (fq *FastQueue) UnblockAllReaders() {
 	fq.cond.Broadcast()
 }
 
-// MustClose unblocks all the readers.
-//
-// It is expected no new writers during and after the call.
+// MustClose 为所有读者unblock
+// 期待本地调用后不会有新的写入
 func (fq *FastQueue) MustClose() {
 	fq.UnblockAllReaders()
 
 	fq.mu.Lock()
 	defer fq.mu.Unlock()
 
-	// flush blocks from fq.ch to fq.pq, so they can be persisted
+	// 持久化
 	fq.flushInmemoryBlocksToFileLocked()
 
 	// Close fq.pq
@@ -101,7 +99,7 @@ func (fq *FastQueue) flushInmemoryBlocksToFileIfNeededLocked() {
 }
 
 func (fq *FastQueue) flushInmemoryBlocksToFileLocked() {
-	// fq.mu must be locked by the caller.
+	// fq.mu 应该被调用者执行lock
 	for len(fq.ch) > 0 {
 		bb := <-fq.ch
 		fq.pq.MustWriteBlock(bb.B)
@@ -109,7 +107,7 @@ func (fq *FastQueue) flushInmemoryBlocksToFileLocked() {
 		fq.lastInmemoryBlockReadTime = fasttime.UnixTimestamp()
 		blockBufPool.Put(bb)
 	}
-	// Unblock all the potentially blocked readers, so they could proceed with reading file-based queue.
+	// Unblock 所有潜在的读取，它们可以读磁盘队列.
 	fq.cond.Broadcast()
 }
 
@@ -138,8 +136,7 @@ func (fq *FastQueue) MustWriteBlock(block []byte) {
 
 	fq.flushInmemoryBlocksToFileIfNeededLocked()
 	if n := fq.pq.GetPendingBytes(); n > 0 {
-		// The file-based queue isn't drained yet. This means that in-memory queue cannot be used yet.
-		// So put the block to file-based queue.
+		// 还在读取文件队列，说明内存队列还是满的.
 		if len(fq.ch) > 0 {
 			logger.Panicf("BUG: the in-memory queue must be empty when the file-based queue is non-empty; it contains %d pending bytes", n)
 		}
@@ -147,7 +144,7 @@ func (fq *FastQueue) MustWriteBlock(block []byte) {
 		return
 	}
 	if len(fq.ch) == cap(fq.ch) {
-		// There is no space in the in-memory queue. Put the data to file-based queue.
+		// 内存队列放满了。将数据放到磁盘文件队列.
 		fq.flushInmemoryBlocksToFileLocked()
 		fq.pq.MustWriteBlock(block)
 		return

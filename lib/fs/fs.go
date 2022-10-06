@@ -109,10 +109,7 @@ func mkdirSync(path string) error {
 	return nil
 }
 
-// RemoveDirContents removes all the contents of the given dir if it exists.
-//
-// It doesn't remove the dir itself, so the dir may be mounted
-// to a separate partition.
+// RemoveDirContents 会清除目录下所有内容，但是不会清除目录本身，所以目录可以被挂载到独立的分区.
 func RemoveDirContents(dir string) {
 	if !IsPathExist(dir) {
 		// The path doesn't exist, so nothing to remove.
@@ -135,6 +132,7 @@ func RemoveDirContents(dir string) {
 		fullPath := dir + "/" + name
 		MustRemoveAll(fullPath)
 	}
+	// 给定路径的变更进行同步
 	MustSyncPath(dir)
 }
 
